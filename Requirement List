@@ -1,0 +1,10 @@
+SRS for a QR code based attendance mobile application.
+
+-Generate a random QR code
+-The QR code must be scanned by students
+-Upon scanning and verification the student's account is logged as attended
+-The teacher is capable of manually editing the attendance log
+
+-Each account can create many classes
+-A class can be attended by many people
+-Each person can attend many classes
