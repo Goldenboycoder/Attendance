@@ -22,6 +22,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         username=findViewById(R.id.edtUsername);
         password=findViewById(R.id.editPassword);
+        SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences(Preference, Context.MODE_PRIVATE);
+        if(sharedPreferences.getBoolean(Authentication,false)){
+            Intent intent=new Intent(getApplicationContext(),AdminHomeScreen.class);
+            startActivity(intent);
+        }
     }
     public void studentAcess(View v){
         Intent intent=new Intent(getApplicationContext(),StudentHomeScreen.class);
