@@ -20,22 +20,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide();
         username=findViewById(R.id.edtUsername);
         password=findViewById(R.id.editPassword);
         SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences(Preference, Context.MODE_PRIVATE);
         if(sharedPreferences.getBoolean(Authentication,false)){
-            Intent intent=new Intent(getApplicationContext(),AdminHomeScreen.class);
+            Intent intent=new Intent(getApplicationContext(),HomeScreen.class);
             startActivity(intent);
         }
     }
     public void studentAcess(View v){
-        Intent intent=new Intent(getApplicationContext(),StudentHomeScreen.class);
+        Intent intent=new Intent(getApplicationContext(),HomeScreen.class);
         startActivity(intent);
     }
 
     public void loginAdmin(View v){
         if(username.getText().toString().equals("admin")&&password.getText().toString().equals("admin")){
-            Intent intent=new Intent(getApplicationContext(),AdminHomeScreen.class);
+            Intent intent=new Intent(getApplicationContext(),HomeScreen.class);
             SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences(Preference, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor=sharedPreferences.edit();
             editor.putBoolean(Authentication,true);

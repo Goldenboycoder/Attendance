@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Attendance</string>
     <string name="Host_Title">Create Your Event</string>
+    <string name="admin">admin</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+
 </resources>
