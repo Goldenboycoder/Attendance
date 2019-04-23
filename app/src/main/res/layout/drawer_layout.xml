@@ -8,11 +8,13 @@
 
     tools:context=".HomeScreen"
     android:background="@color/colorPrimary">
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/f1content"
         android:layout_height="match_parent">
 
-    </LinearLayout>
+    </FrameLayout>
 
     <android.support.design.widget.NavigationView
         app:headerLayout="@layout/header"
