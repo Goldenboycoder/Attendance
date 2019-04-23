@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer"
+    android:id="@+id/Sdrawer"
 
     tools:context=".HomeScreen"
     android:background="@color/colorPrimary">
@@ -20,7 +20,7 @@
         app:headerLayout="@layout/header"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
+        android:id="@+id/Snav_view"
         android:background="@color/colorBlueDark"
         app:itemTextColor="@color/colorPrimary"
         app:itemIconTint="@color/colorPrimary"

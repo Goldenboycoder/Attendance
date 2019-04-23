@@ -1,15 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Profile">
+    android:background="@color/colorPrimary"
+    tools:context=".StudentProfile">
 
-    <!-- TODO: Update blank fragment layout -->
+    <EditText
+        android:id="@+id/editStudentName"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="53dp"
+        android:background="@drawable/editteext_rounded_bg"
+        android:drawableLeft="@drawable/ic_action_profile"
+        android:ems="10"
+        android:hint="Student Name"
+        android:inputType="textPersonName"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/editStudentID"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <EditText
+        android:id="@+id/editStudentID"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="126dp"
+        android:background="@drawable/editteext_rounded_bg"
+        android:drawableLeft="@drawable/ic_action_student_id"
+        android:ems="10"
+        android:hint="Student ID"
+        android:inputType="number|textPersonName"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/btnDone"
+        app:layout_constraintStart_toStartOf="@+id/editStudentName"
+        app:layout_constraintTop_toBottomOf="@+id/editStudentName" />
+
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Profile fragment"
-        android:textSize="30sp" />
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="33dp"
+        android:layout_marginBottom="138dp"
+        android:text="Enter Profile Info"
+        android:textAlignment="center"
+        android:textColor="@color/colorBlueDark"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/editStudentName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/btnDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="212dp"
+        android:background="@drawable/button_rounded_bg"
+        android:text="Done"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editStudentID" />
+</android.support.constraint.ConstraintLayout>

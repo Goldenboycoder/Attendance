@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+    <item android:id="@+id/Aprofile" android:title="Profile" android:icon="@drawable/ic_action_profile"/>
+    <item android:id="@+id/Ascanner" android:title="Qr code scanner" android:icon="@drawable/ic_action_scanner"/>-->
+    <item android:id="@+id/Alogout" android:title="Logout" android:icon="@drawable/ic_logout"/>
+    <item android:id="@+id/AcreateCourse" android:title="Create Course" android:icon="@drawable/ic_action_create_course"/>
+    <item android:id="@+id/AshowAttendace" android:title="Generate QR code" android:icon="@drawable/ic_action_show_attendance"/>
+
+</menu>
