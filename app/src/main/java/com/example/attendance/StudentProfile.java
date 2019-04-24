@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,49 +21,35 @@ import android.widget.Toast;
  * Use the {@link StudentProfile#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class StudentProfile extends Fragment {
+public class StudentProfile extends Fragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+
     TextView name;
     TextView id;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    public final String Preference="privateS";
+    public final String Student_Name="sname";
+    public final String Student_ID="S_ID";
 
-    private OnFragmentInteractionListener mListener;
+
 
     public StudentProfile() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StudentProfile.
-     */
+
     // TODO: Rename and change types and number of parameters
-    public static StudentProfile newInstance(String param1, String param2) {
+    public static StudentProfile newInstance() {
         StudentProfile fragment = new StudentProfile();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
@@ -72,14 +59,14 @@ public class StudentProfile extends Fragment {
         View v= inflater.inflate(R.layout.fragment_profile, container, false);
         name=v.findViewById(R.id.editStudentName);
         id=v.findViewById(R.id.editStudentID);
+        Button done=v.findViewById(R.id.btnDone);
+        done.setOnClickListener(this);
         return v;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+
     }
 
     @Override
@@ -91,7 +78,7 @@ public class StudentProfile extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+
     }
 
     /**
@@ -108,15 +95,29 @@ public class StudentProfile extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-    public final String Preference="privateS";
-    public final String Student_Name="sname";
-    public final String Student_ID="S_ID";
-    public void done(View v){
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnDone:
+                SharedPreferences sharedPreferences=getActivity().getSharedPreferences(Preference, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor=sharedPreferences.edit();
+                editor.putString(Student_Name,name.getText().toString());
+                editor.putString(Student_ID,id.getText().toString());
+                editor.commit();
+                Toast.makeText(getActivity(),"Profile Created",Toast.LENGTH_SHORT).show();
+                break;
+                default:
+                    Toast.makeText(getContext(),"onclick error",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*public void done(View v){
         SharedPreferences sharedPreferences=getActivity().getSharedPreferences(Preference, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor=sharedPreferences.edit();
         editor.putString(Student_Name,name.getText().toString());
         editor.putString(Student_ID,id.getText().toString());
         editor.commit();
         Toast.makeText(getActivity(),"Profile Created",Toast.LENGTH_SHORT).show();
-    }
+    }*/
 }

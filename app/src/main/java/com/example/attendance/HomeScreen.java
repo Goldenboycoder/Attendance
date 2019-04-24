@@ -21,6 +21,9 @@ public class HomeScreen extends AppCompatActivity {
     public final String Preference="privateS";
     public final String Authentication="isLogedin";
 
+    public final String Student_Name="sname";
+    public final String Student_ID="S_ID";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +49,13 @@ public class HomeScreen extends AppCompatActivity {
         mDrrawerLayout.addDrawerListener(mToggle);
         mToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         setupDrawerContent(nvDrawer);
+
+       /* SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences(Preference, Context.MODE_PRIVATE);
+        if(sharedPreferences.contains(Student_Name)&&sharedPreferences.contains(Student_ID)){
+            TextView username=findViewById(R.id.profile_name);
+            username.setText(sharedPreferences.getString(Student_Name,"User")+"  ID : "+sharedPreferences.getString(Student_ID,"xxxxxxx"));
+        }*/
     }
 
     @Override
@@ -120,6 +128,11 @@ public class HomeScreen extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 selectItemDrawer(menuItem);
+                SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences(Preference, Context.MODE_PRIVATE);
+                if(sharedPreferences.contains(Student_Name)&&sharedPreferences.contains(Student_ID)){
+                    TextView username=findViewById(R.id.profile_name);
+                    username.setText(sharedPreferences.getString(Student_Name,"User")+"  ID : "+sharedPreferences.getString(Student_ID,"xxxxxxx"));
+                }
                 return true;
             }
         });

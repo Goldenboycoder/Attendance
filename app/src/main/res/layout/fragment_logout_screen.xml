@@ -13,13 +13,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="38dp"
-        android:layout_marginBottom="140dp"
+        android:layout_marginBottom="104dp"
         android:text="Logged out Successfully"
         android:textAlignment="center"
         android:textColor="@color/colorBlueDark"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/btnExit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
@@ -27,8 +27,8 @@
         android:id="@+id/imageView2"
         android:layout_width="200dp"
         android:layout_height="0dp"
-        android:layout_marginTop="3dp"
-        android:layout_marginBottom="105dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="104dp"
         android:src="@drawable/logo_transparent"
         app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,13 +36,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnExit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="194dp"
         android:background="@drawable/editteext_rounded_bg"
         android:fontFamily="monospace"
-        android:onClick="exite"
+        android:onClick="onClick"
         android:text="Exit"
         android:textAlignment="center"
         android:textSize="18sp"

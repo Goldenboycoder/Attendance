@@ -24,10 +24,12 @@ public class MainActivity extends AppCompatActivity {
         username=findViewById(R.id.edtUsername);
         password=findViewById(R.id.editPassword);
         SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences(Preference, Context.MODE_PRIVATE);
-        if(sharedPreferences.getBoolean(Authentication,false)){
-            Intent intent=new Intent(getApplicationContext(),HomeScreen.class);
-            intent.putExtra("admin",true);
-            startActivity(intent);
+        if(sharedPreferences.contains(Authentication)) {
+            if (sharedPreferences.getBoolean(Authentication, false)) {
+                Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
+                intent.putExtra("admin", true);
+                startActivity(intent);
+            }
         }
     }
     public void studentAcess(View v){
