@@ -4,30 +4,24 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/Sdrawer"
-
-    tools:context=".HomeScreen"
+    android:id="@+id/drawer"
+    tools:context=".HomeActivity"
     android:background="@color/colorPrimary">
     <FrameLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
-        android:id="@+id/f1content"
-        android:layout_height="match_parent">
-
-    </FrameLayout>
+        android:id="@+id/fcontent"
+        android:layout_height="match_parent"/>
 
     <android.support.design.widget.NavigationView
-        app:headerLayout="@layout/header"
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/Snav_view"
-        android:background="@color/colorBlueDark"
-        app:itemTextColor="@color/colorPrimary"
-        app:itemIconTint="@color/colorPrimary"
-        app:menu="@menu/drawermenue"
         android:layout_gravity="start"
-        >
-        </android.support.design.widget.NavigationView>
-
+        android:background="@color/colorBlueDark"
+        app:headerLayout="@layout/header"
+        app:itemIconTint="@color/colorPrimary"
+        app:itemTextColor="@color/colorPrimary"
+        app:menu="@menu/drawermenue" />
 
 </android.support.v4.widget.DrawerLayout>

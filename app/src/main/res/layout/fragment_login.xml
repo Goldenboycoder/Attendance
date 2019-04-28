@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/appbackground"
-    tools:context=".MainActivity">
+    tools:context=".LoginFragment">
 
     <ImageView
         android:id="@+id/imageView"
@@ -41,39 +41,38 @@
         android:id="@+id/editPassword"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginStart="12dp"
         android:layout_marginTop="44dp"
         android:background="@drawable/editteext_rounded_bg"
         android:drawableLeft="@drawable/ic_action_pass"
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
         app:layout_constraintStart_toStartOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/edtUsername" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnLog"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
         android:layout_marginTop="72dp"
         android:background="@drawable/editteext_rounded_bg"
-        android:onClick="loginAdmin"
-        android:text="Login as Admin"
+        android:text="Login"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/editPassword"
         app:layout_constraintStart_toStartOf="@+id/editPassword"
         app:layout_constraintTop_toBottomOf="@+id/editPassword" />
 
     <Button
-        android:id="@+id/btnUserAccess"
+        android:id="@+id/btnReturn"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:background="@drawable/button_rounded_bg"
         android:fontFamily="monospace"
-        android:onClick="studentAccess"
-        android:text="Student"
+        android:text="Return"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/btnLogin"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+        app:layout_constraintEnd_toEndOf="@+id/btnLog"
+        app:layout_constraintStart_toStartOf="@+id/btnLog"
+        app:layout_constraintTop_toBottomOf="@+id/btnLog" />
 </android.support.constraint.ConstraintLayout>

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:context=".StudentProfile">
+    tools:context=".ProfileFragment">
 
     <EditText
         android:id="@+id/editStudentName"
