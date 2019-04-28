@@ -71,7 +71,7 @@
         android:layout_marginTop="48dp"
         android:background="@drawable/button_rounded_bg"
         android:fontFamily="monospace"
-        android:onClick="studentAcess"
+        android:onClick="studentAccess"
         android:text="Student"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/btnLogin"
