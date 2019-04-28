@@ -37,6 +37,10 @@ public class ProfileFragment extends Fragment {
                 editor.putString(Student_ID, id.getText().toString());
                 editor.commit();
                 Toast.makeText(getActivity(), "Profile Updated", Toast.LENGTH_SHORT).show();
+                //Reload Activity
+                if(getActivity() != null){
+                    ((HomeActivity)getActivity()).reload();
+                }
             }
         });
         return v;
