@@ -1,9 +1,13 @@
 package com.example.attendance;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +26,7 @@ public class HomeActivity extends AppCompatActivity {
     private ActionBarDrawerToggle mToggle;
     private SharedPreferences prefs;
     public static final String MY_PREFS_NAME = "ATTENDANCE_APP_PREFS";
+    private static final int CAMERA_PERMISSION = 1;
     public final String Student_Name = "S_Name";
     public final String Student_ID = "S_ID";
     private boolean isAdmin;
@@ -63,7 +68,7 @@ public class HomeActivity extends AppCompatActivity {
         }
         else {
             username.setText("User: " + prefs.getString(Student_Name, "N/A") + "\nID : " + prefs.getString(Student_ID, "N/A"));
-            initialFragment = new ScannerFragment();
+            initialFragment = new ProfileFragment();
         }
         fragmentManager.beginTransaction().replace(R.id.fcontent, initialFragment).addToBackStack(null).commit();
     }
@@ -94,7 +99,7 @@ public class HomeActivity extends AppCompatActivity {
                 myFragment = new ProfileFragment();
                 break;
             case 4 :
-                myFragment = new ScannerFragment();
+                launchScanner();
                 break;
             case 5 :
                 myFragment = new LoginFragment();
@@ -103,12 +108,13 @@ public class HomeActivity extends AppCompatActivity {
                 myFragment = new ProfileFragment();
         }
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        //Clear Fragment Backstack
-        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        //Set Fragment
-        if(myFragment != null)
-            fragmentManager.beginTransaction().replace(R.id.fcontent,myFragment).addToBackStack(null).commit();
+        if(myFragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            //Clear Fragment Backstack
+            getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            //Set Fragment
+            fragmentManager.beginTransaction().replace(R.id.fcontent, myFragment).addToBackStack(null).commit();
+        }
         menuItem.setChecked(true);
         setTitle(menuItem.getTitle());
         mDrawerLayout.closeDrawers();
@@ -137,6 +143,31 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    public void launchScanner() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION);
+        } else {
+            Intent intent = new Intent(this, ScannerActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    //Checks for camera permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(this, ScannerActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Please grant camera permission to use the QR Scanner", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
     //Reload activity
     public void reload(){
         finish();
@@ -150,5 +181,4 @@ public class HomeActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
