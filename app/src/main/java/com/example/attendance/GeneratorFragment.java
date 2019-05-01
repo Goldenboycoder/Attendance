@@ -61,7 +61,7 @@ public class GeneratorFragment extends Fragment {
                 try{
                     inputValue = spinner.getSelectedItem().toString();
                 }catch(Exception e) {
-                    Toast.makeText(getActivity().getApplicationContext(), "Error. Check Internet Connectivity", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "Error. Check Internet Connectivity.", Toast.LENGTH_SHORT).show();
                 }
                 //code relating to the generation process
                 WindowManager manager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
