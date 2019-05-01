@@ -116,8 +116,11 @@ public class GeneratorFragment extends Fragment {
                     for (int i = 0; i < courses.size(); i++) {
                         CourseIDs.add(courses.get(i).getId());
                     }
-                    adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, CourseIDs);
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    //adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, CourseIDs);
+                    //created a customized layout for the selected item
+                    adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,CourseIDs);
+                    //created a customized item drop down layout
+                    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                     spinner.setAdapter(adapter);
                     Log.d("task", "hi" + CourseIDs.size());
                     h.postDelayed(runnable, delay);
