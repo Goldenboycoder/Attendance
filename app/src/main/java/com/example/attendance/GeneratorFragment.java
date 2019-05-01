@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,7 +58,11 @@ public class GeneratorFragment extends Fragment {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                inputValue = spinner.getSelectedItem().toString();
+                try{
+                    inputValue = spinner.getSelectedItem().toString();
+                }catch(Exception e) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Error. Check Internet Connectivity.", Toast.LENGTH_SHORT).show();
+                }
                 //code relating to the generation process
                 WindowManager manager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
                 Display display = manager.getDefaultDisplay();
