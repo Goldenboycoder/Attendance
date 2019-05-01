@@ -6,8 +6,8 @@
     android:singleLine="true"
     android:ellipsize="marquee"
     android:textSize="20sp"
-    android:textColor="@android:color/background_dark"
-    android:background="@color/colorBlueDark"
+    android:textColor="@color/colorBlueDark"
+    android:background="@color/colorPrimary"
 
     >
 
