@@ -2,6 +2,7 @@ package com.example.attendance;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -46,10 +48,12 @@ public class GeneratorFragment extends Fragment {
     Handler h = new Handler();
     int delay = 1000; //1 second = 1000 millisecond
     Runnable runnable;
+    ProgressBar ProgressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_generator, container, false);
+        ProgressBar = v.findViewById(R.id.progressBar);
         loadCourses();
         spinner = v.findViewById(R.id.spinner);
         //Generate QR code
@@ -124,8 +128,10 @@ public class GeneratorFragment extends Fragment {
                     spinner.setAdapter(adapter);
                     Log.d("task", "hi" + CourseIDs.size());
                     h.postDelayed(runnable, delay);
+                    ProgressBar.setVisibility(ProgressBar.VISIBLE);
                 } else {
                     h.removeCallbacks(runnable);
+                    ProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 }
             }
         }, delay);
@@ -135,6 +141,8 @@ public class GeneratorFragment extends Fragment {
     @Override
     public void onPause() {
         h.removeCallbacks(runnable); //stop handler when fragment not visible
+        ProgressBar.setVisibility(ProgressBar.INVISIBLE);
         super.onPause();
     }
+
 }
