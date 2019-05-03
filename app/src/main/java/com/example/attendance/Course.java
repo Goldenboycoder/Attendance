@@ -4,14 +4,17 @@ public class Course {
     private String id;
     private String name;
     private String section;
+    private Student[] students;
 
     public Course() {
     }
 
-    public Course(String id, String name, String section) {
+    public Course(String id, String name, String section, Student[] students) {
         this.id = id;
         this.name = name;
         this.section = section;
+        this.students = students;
+
     }
 
     public String getId() {
@@ -36,5 +39,13 @@ public class Course {
 
     public void setSection(String section) {
         this.section = section;
+    }
+
+    public Student[] getStudents() {
+        return students;
+    }
+
+    public void setStudents(Student[] students) {
+        this.students = students;
     }
 }
