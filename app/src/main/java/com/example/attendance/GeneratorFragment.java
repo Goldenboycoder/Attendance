@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -48,20 +47,32 @@ public class GeneratorFragment extends Fragment {
     ArrayList<String> CourseIDs = new ArrayList<>();
     ArrayList<Course> courses = new ArrayList<>();
     private DatabaseReference mDatabase;
-    Handler h = new Handler();
-    int delay = 1000; //1 second = 1000 millisecond
-    Runnable runnable;
     ProgressBar ProgressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_generator, container, false);
         ProgressBar = v.findViewById(R.id.progressBar);
-        loadCourses();
-        spinner = v.findViewById(R.id.spinner);
-        //Generate QR code
         qrImage = v.findViewById(R.id.QR_Image);
         start = v.findViewById(R.id.start);
+        spinner = v.findViewById(R.id.spinner);
+        //Load courses
+        loadCourses(new MyCallback() {
+            @Override
+            public void onCallback() {
+                for (int i = 0; i < courses.size(); i++) {
+                    CourseIDs.add(courses.get(i).getId());
+                }
+                //adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, CourseIDs);
+                //created a customized layout for the selected item
+                adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,CourseIDs);
+                //created a customized item drop down layout
+                adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+                spinner.setAdapter(adapter);
+                ProgressBar.setVisibility(View.INVISIBLE);
+            }
+        });
+        //Generate QR code
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,16 +114,20 @@ public class GeneratorFragment extends Fragment {
     }
 
     //Loads courses into the app
-    private void loadCourses() {
+    private void loadCourses(final MyCallback myCallback) {
         //Reading courses
         mDatabase = FirebaseDatabase.getInstance().getReference().child("courses");
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //loop to go through all the child nodes of courses(which are the randomly generated keys)
-                for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
-                    //Store courses into arraylist
-                    courses.add(uniqueKeySnapshot.getValue(Course.class));
+                if (dataSnapshot.exists()) {
+                    //loop to go through all the child nodes of courses(which are the randomly generated keys)
+                    for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
+                        //Store courses into arraylist
+                        courses.add(uniqueKeySnapshot.getValue(Course.class));
+                        ProgressBar.setVisibility(ProgressBar.VISIBLE);
+                        myCallback.onCallback();
+                    }
                 }
             }
 
@@ -122,38 +137,7 @@ public class GeneratorFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onResume() {
-        //start handler as fragment becomes visible
-        h.postDelayed(runnable = new Runnable() {
-            public void run() {
-                //Check if data arrived from database and laod into spinner
-                if (CourseIDs.size() == 0) {
-                    for (int i = 0; i < courses.size(); i++) {
-                        CourseIDs.add(courses.get(i).getId());
-                    }
-                    //adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, CourseIDs);
-                    //created a customized layout for the selected item
-                    adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,CourseIDs);
-                    //created a customized item drop down layout
-                    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-                    spinner.setAdapter(adapter);
-                    Log.d("task", "hi" + CourseIDs.size());
-                    h.postDelayed(runnable, delay);
-                    ProgressBar.setVisibility(ProgressBar.VISIBLE);
-                } else {
-                    h.removeCallbacks(runnable);
-                    ProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                }
-            }
-        }, delay);
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        h.removeCallbacks(runnable); //stop handler when fragment not visible
-        ProgressBar.setVisibility(ProgressBar.INVISIBLE);
-        super.onPause();
+    public interface MyCallback {
+        void onCallback();
     }
 }

@@ -1,15 +1,17 @@
 package com.example.attendance;
 
+import java.util.ArrayList;
+
 public class Course {
     private String id;
     private String name;
     private String section;
-    private Student[] students;
+    private ArrayList<Student> students;
 
     public Course() {
     }
 
-    public Course(String id, String name, String section, Student[] students) {
+    public Course(String id, String name, String section, ArrayList<Student> students) {
         this.id = id;
         this.name = name;
         this.section = section;
@@ -41,11 +43,11 @@ public class Course {
         this.section = section;
     }
 
-    public Student[] getStudents() {
+    public ArrayList<Student> getStudents() {
         return students;
     }
 
-    public void setStudents(Student[] students) {
+    public void setStudents(ArrayList<Student> students) {
         this.students = students;
     }
 }

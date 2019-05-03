@@ -41,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
         prefs = getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
         isAdmin =  prefs.getBoolean("isAdmin",false);
 
+
         //Set up the navigation drawer
         NavigationView nvDrawer;
         setContentView(R.layout.activity_homescreen);
@@ -69,6 +70,12 @@ public class HomeActivity extends AppCompatActivity {
             initialFragment = new GeneratorFragment();
         }
         else {
+            //Disable scanning if user profile not created
+            if(!(prefs.getBoolean("profileCreated", false))) {
+                Menu menuNav = nvDrawer.getMenu();
+                MenuItem scannerButton = menuNav.findItem(4);
+                scannerButton.setVisible(false);
+            }
             username.setText("User: " + prefs.getString(Student_Name, "N/A") + "\nID : " + prefs.getString(Student_ID, "N/A"));
             initialFragment = new ProfileFragment();
         }
@@ -89,9 +96,11 @@ public class HomeActivity extends AppCompatActivity {
                 //Change account status
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putBoolean("isAdmin", false);
-                //Clear Account Profile
+                //Clear account profile
                 editor.putString(Student_ID, null);
                 editor.putString(Student_Name, null);
+                //Enable new profile creation
+                editor.putBoolean("profileCreated", false);
                 //Commit changes & reload activity
                 editor.commit();
                 reload();
