@@ -1,12 +1,15 @@
 package com.example.attendance;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -19,8 +22,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class HomeActivity extends AppCompatActivity {
@@ -32,6 +38,7 @@ public class HomeActivity extends AppCompatActivity {
     public final String Student_Name = "S_Name";
     public final String Student_ID = "S_ID";
     private boolean isAdmin;
+    CircleImageView profilPic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,4 +200,25 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+   /* @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Toast.makeText(getApplicationContext(),"in result",Toast.LENGTH_SHORT).show();
+        if (resultCode == RESULT_OK) {
+            Toast.makeText(getApplicationContext(),"in result 0k",Toast.LENGTH_SHORT).show();
+            if (requestCode == 333) {
+                Toast.makeText(getApplicationContext(),"in rquest 333",Toast.LENGTH_SHORT).show();
+                if (data != null) {
+                    Toast.makeText(getApplicationContext(),"data not null",Toast.LENGTH_SHORT).show();
+                    //getting captured image
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    profilPic.setImageBitmap(photo);
+                }
+                else
+                    Toast.makeText(getApplicationContext(),"data empty",Toast.LENGTH_SHORT).show();
+
+            }
+        }
+
+    }*/
 }

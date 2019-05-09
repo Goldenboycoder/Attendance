@@ -10,11 +10,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -42,6 +47,8 @@ public class CreateCourseFragment extends Fragment {
     EditText courseSection;
     Uri uriData;
     ArrayList<Student> students = new ArrayList<>();
+    //private EditText inputCourseId,inputCourseName,inputCourseSection;
+    private TextInputLayout inputLayoutCourseID,inputLayoutCourseName,inputLayoutCourseSection;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,6 +57,15 @@ public class CreateCourseFragment extends Fragment {
         courseId = v.findViewById(R.id.CourseIdET);
         courseName = v.findViewById(R.id.CourseNameET);
         courseSection = v.findViewById(R.id.CourseSectionET);
+
+        inputLayoutCourseID=v.findViewById(R.id.input_layout_courseid);
+        inputLayoutCourseName=v.findViewById(R.id.input_layout_coursename);
+        inputLayoutCourseSection=v.findViewById(R.id.input_layout_coursesection);
+
+        courseId.addTextChangedListener(new MyTextWatcher(courseId));
+        courseName.addTextChangedListener(new MyTextWatcher(courseName));
+        courseSection.addTextChangedListener(new MyTextWatcher(courseSection));
+
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,6 +81,77 @@ public class CreateCourseFragment extends Fragment {
         });
         return v;
     }
+
+    private class MyTextWatcher implements TextWatcher{
+        private View view;
+
+        private MyTextWatcher(View view){
+            this.view=view;
+        }
+
+        private void requestFocus(View view) {
+            if (view.requestFocus()) {
+                getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            }
+        }
+
+        private boolean validateID() {
+            if (courseId.getText().toString().trim().isEmpty()) {
+                inputLayoutCourseID.setError(getString(R.string.err_msg_id));
+                requestFocus(courseId);
+                return false;
+            } else {
+                inputLayoutCourseID.setErrorEnabled(false);
+            }
+
+            return true;
+        }
+
+        private boolean validateName() {
+            if (courseName.getText().toString().trim().isEmpty()) {
+                inputLayoutCourseName.setError(getString(R.string.err_msg_name));
+                requestFocus(courseName);
+                return false;
+            } else {
+                inputLayoutCourseName.setErrorEnabled(false);
+            }
+
+            return true;
+        }
+        private boolean validateSection() {
+            if (courseSection.getText().toString().trim().isEmpty()) {
+                inputLayoutCourseSection.setError(getString(R.string.err_msg_section));
+                requestFocus(courseSection);
+                return false;
+            } else {
+                inputLayoutCourseSection.setErrorEnabled(false);
+            }
+
+            return true;
+        }
+
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.CourseIdET:
+                    validateName();
+                    break;
+                case R.id.CourseNameET:
+                    validateName();
+                    break;
+                case R.id.CourseSectionET:
+                    validateSection();
+                    break;
+            }
+        }
+    }
+
+
 
     private void AddCourse(String id, String name, String section) {
         mDatabase = FirebaseDatabase.getInstance().getReference("courses");
