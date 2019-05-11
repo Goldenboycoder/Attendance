@@ -46,7 +46,7 @@ public class ProfileFragment extends Fragment {
     private DatabaseReference mDatabase;
     private ArrayList<String> studentIDs = new ArrayList<>();
     private ProgressBar ProgressBar;
-    CircleImageView profilPic;
+    CircleImageView profilePic;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -134,13 +134,9 @@ public class ProfileFragment extends Fragment {
            if (requestCode == 333) {
                if (data != null) {
                    View view = getActivity().findViewById(R.id.profile_pic);
-                   profilPic = view.findViewById(R.id.profile_pic);
-                   Bundle b=data.getExtras();
-                   //getting and setting captured image
-                   Bitmap photo = (Bitmap) b.get("data");
-                   profilPic.setImageBitmap(photo);
-
-                   //Use imageuri variable to use the uri of the image
+                   profilePic = view.findViewById(R.id.profile_pic);
+                   //Set the image
+                   profilePic.setImageURI(imageuri);
                    //store the image in firebase
 
                }
@@ -156,6 +152,7 @@ public class ProfileFragment extends Fragment {
         File photo = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
         imageuri = Uri.fromFile(photo);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageuri);
+        //Remove Uri exposed error
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         startActivityForResult(intent, 333);

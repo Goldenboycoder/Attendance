@@ -44,13 +44,10 @@ public class HomeActivity extends AppCompatActivity {
     public final String Student_Name = "S_Name";
     public final String Student_ID = "S_ID";
     private boolean isAdmin;
-    CircleImageView profilPic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        //StrictMode.setVmPolicy(builder.build());
         //Retrieve Shared Preferences
         prefs = getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
         isAdmin =  prefs.getBoolean("isAdmin",false);
@@ -121,6 +118,10 @@ public class HomeActivity extends AppCompatActivity {
                 //Clear account profile
                 editor.putString(Student_ID, null);
                 editor.putString(Student_Name, null);
+                //Delete pfp
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
+                if(file.exists())
+                    file.delete();
                 //Enable new profile creation
                 editor.putBoolean("profileCreated", false);
                 //Commit changes & reload activity
