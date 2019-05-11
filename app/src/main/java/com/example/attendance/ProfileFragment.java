@@ -128,20 +128,13 @@ public class ProfileFragment extends Fragment {
    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-       if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
            if (requestCode == 333) {
-               if (data != null) {
-                   View view = getActivity().findViewById(R.id.profile_pic);
-                   profilePic = view.findViewById(R.id.profile_pic);
-                   //Set the image
-                   profilePic.setImageURI(imageuri);
-                   //store the image in firebase
-
-               }
-               else
-                   Toast.makeText(getContext(),"data empty",Toast.LENGTH_SHORT).show();
-
+               View view = getActivity().findViewById(R.id.profile_pic);
+               profilePic = view.findViewById(R.id.profile_pic);
+               //Set the image
+               profilePic.setImageURI(imageuri);
+               //store the image in firebase
            }
        }
     }
