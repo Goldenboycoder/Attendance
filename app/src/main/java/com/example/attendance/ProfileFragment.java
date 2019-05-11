@@ -115,7 +115,6 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 Intent i=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if(i.resolveActivity(getActivity().getPackageManager())!=null) {
-                    //fragment.startActivityForResult(i, 333);
                     takePicture();
                 }
                 else
