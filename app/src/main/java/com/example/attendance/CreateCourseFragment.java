@@ -194,7 +194,7 @@ public class CreateCourseFragment extends Fragment {
     }
 
     public void readExcelFile(Context context, Uri u) {
-        isStoragePermissionGranted();
+        //isStoragePermissionGranted();
         DataFormatter fmt = new DataFormatter();
         try {
             // Creating Input Stream from uri
@@ -259,19 +259,19 @@ public class CreateCourseFragment extends Fragment {
         return s;
     }
     //Check storage permissions
-    private  boolean isStoragePermissionGranted() {
+    /*private  boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (getActivity().checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 return true;
             } else {
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
                 return false;
             }
         }
         else { //permission is automatically granted on sdk<23 upon installation
             return true;
         }
-    }
+    }*/
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {

@@ -1,18 +1,25 @@
 package com.example.attendance;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,6 +39,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -125,6 +134,7 @@ public class ProfileFragment extends Fragment {
         return v;
     }
 
+
    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -132,23 +142,54 @@ public class ProfileFragment extends Fragment {
            if (requestCode == 333) {
                View view = getActivity().findViewById(R.id.profile_pic);
                profilePic = view.findViewById(R.id.profile_pic);
+               /*String path=ImagePath.getPath(getActivity(),imageuri);
+               Toast.makeText(getActivity(),path,Toast.LENGTH_SHORT).show();
+               Bitmap photo=null;
+               try {
+                   InputStream imageStream = getActivity().openFileInput(path);
+                   photo = BitmapFactory.decodeStream(imageStream);
+                   imageStream.close();
+               }catch (Exception e){}*/
+               Log.d("imageuri:", imageuri.toString());
+
                //Set the image
                profilePic.setImageURI(imageuri);
+               //profilePic.setImageBitmap(photo);
+               Toast.makeText(getActivity(),imageuri.toString(),Toast.LENGTH_SHORT).show();
                //store the image in firebase
+
+
            }
        }
     }
+
     Uri imageuri;
     public void takePicture() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File photo = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
-        imageuri = Uri.fromFile(photo);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageuri);
-        //Remove Uri exposed error
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
-        startActivityForResult(intent, 333);
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            File photo = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
+            imageuri = Uri.fromFile(photo);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageuri);
+            //Remove Uri exposed error
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+            startActivityForResult(intent, 333);
+
     }
+
+    /*@Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("uri",imageuri.toString());
+
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if(savedInstanceState!=null){
+            imageuri=Uri.parse(savedInstanceState.getString("uri"));
+        }
+    }*/
 
     public interface retrieveStudentIDsCallback {
         void onCallback();

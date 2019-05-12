@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
@@ -41,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     public static final String MY_PREFS_NAME = "ATTENDANCE_APP_PREFS";
     private static final int CAMERA_PERMISSION = 1;
+    private static final int STORAGE_PERMISSION = 2;
     public final String Student_Name = "S_Name";
     public final String Student_ID = "S_ID";
     private boolean isAdmin;
@@ -90,15 +92,30 @@ public class HomeActivity extends AppCompatActivity {
             }
             username.setText("User: " + prefs.getString(Student_Name, "N/A") + "\nID : " + prefs.getString(Student_ID, "N/A"));
             //load user pfp
-            File pfpFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
-            if(pfpFile.exists()) {
-                Bitmap myBitmap = BitmapFactory.decodeFile(pfpFile.getAbsolutePath());
-                pfp.setImageBitmap(myBitmap);
+            if(isStoragePermissionGranted()) {
+                File pfpFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
+                if (pfpFile.exists()) {
+                    Bitmap myBitmap = BitmapFactory.decodeFile(pfpFile.getAbsolutePath());
+                    pfp.setImageBitmap(myBitmap);
+                }
             }
 
             initialFragment = new ProfileFragment();
         }
         fragmentManager.beginTransaction().replace(R.id.fcontent, initialFragment).addToBackStack(null).commit();
+    }
+    private  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (this.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            return true;
+        }
     }
 
     //Perform Menu Item Action
@@ -188,7 +205,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     //Checks for camera permission
-    @Override
+   @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case CAMERA_PERMISSION:
@@ -197,6 +214,15 @@ public class HomeActivity extends AppCompatActivity {
                     startActivity(intent);
                 } else {
                     Toast.makeText(this, "Please grant camera permission to use the QR Scanner", Toast.LENGTH_SHORT).show();
+                    this.finish();
+                }
+                break;
+            case STORAGE_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    Toast.makeText(this, "Please grant storage permission ", Toast.LENGTH_SHORT).show();
+                    this.finish();
                 }
                 break;
         }
