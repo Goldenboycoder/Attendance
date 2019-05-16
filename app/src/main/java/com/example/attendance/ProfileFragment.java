@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -32,16 +33,23 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -53,6 +61,9 @@ public class ProfileFragment extends Fragment {
     public final String Student_Name = "S_Name";
     public final String Student_ID = "S_ID";
     private DatabaseReference mDatabase;
+    private StorageReference mStorageRef;
+    private String profilePictureURL="";
+    public final String STUDENT_PROFILE_PICTURES_LOCATION="students_pics";
     private ArrayList<String> studentIDs = new ArrayList<>();
     private ProgressBar ProgressBar;
     CircleImageView profilePic;
@@ -116,6 +127,7 @@ public class ProfileFragment extends Fragment {
                 }else{
                     Toast.makeText(getActivity().getApplicationContext(),"Please choose a valid ID", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 
@@ -157,7 +169,7 @@ public class ProfileFragment extends Fragment {
                //profilePic.setImageBitmap(photo);
                Toast.makeText(getActivity(),imageuri.toString(),Toast.LENGTH_SHORT).show();
                //store the image in firebase
-
+               uploadPp();
 
            }
        }
@@ -228,5 +240,58 @@ public class ProfileFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
+    }
+    public void uploadPp(){
+        mStorageRef= FirebaseStorage.getInstance().getReference("students_pics");
+        mDatabase=FirebaseDatabase.getInstance().getReference();
+
+        if(imageuri!=null){
+            final StorageReference pictureRef=mStorageRef.child(id.getText().toString()+".jpg");
+            pictureRef.putFile(imageuri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            //code to run if upload was a success
+                            Handler handler=new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ProgressBar.setProgress(0);
+                                    ProgressBar.setVisibility(View.INVISIBLE);
+                                }
+                            },5000);
+                            Toast.makeText(getContext(),"Upload Successful",Toast.LENGTH_LONG).show();
+                            //code to set Url for student pp
+                            profilePictureURL=pictureRef.getDownloadUrl().toString();
+                            String nod="-LdzLK93CWW0RkfyloZq";
+                            HashMap<String,Object> map=new HashMap<>();
+                            map.put("imageURL",profilePictureURL);
+                            mDatabase.child("courses").child("-LdzLK93CWW0RkfyloZq").child("students").child("1").child("imageURL").setValue(profilePictureURL);
+
+
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            //code to run if upload failed
+                            Toast.makeText(getContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            //code to do when upload is in progress
+                            double progress=(100* taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                            ProgressBar.setVisibility(getView().VISIBLE);
+                            ProgressBar.setProgress((int) progress);
+                        }
+                    });
+        }
+        else {
+            Toast.makeText(getActivity(),"Profile pic not taken ",Toast.LENGTH_SHORT).show();
+        }
+
     }
 }
