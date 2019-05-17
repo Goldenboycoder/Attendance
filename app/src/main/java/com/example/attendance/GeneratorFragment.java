@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -68,15 +69,17 @@ public class GeneratorFragment extends Fragment {
                 /*for (int i = 0; i < courses.size(); i++) {
                     CourseIDs.add(courses.get(i).getId());
                 }*/
-                //adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, CourseIDs);
+                adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, sCourses);
                 //created a customized layout for the selected item
-               adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,sCourses);
+               //adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,sCourses);
                 //created a customized item drop down layout
-                adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+                adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                 spinner.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
                 ProgressBar.setVisibility(View.INVISIBLE);
             }
         });
+
        /* for(int i=0;i<CourseIDs.size();i++) {
             loadSections(new MySectionCallback() {
                 @Override
@@ -98,6 +101,9 @@ public class GeneratorFragment extends Fragment {
                     try {
                         //Get system date
                         String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+                        if(spinner.getSelectedItem()==null){
+                            Toast.makeText(getActivity().getApplicationContext(), "Select a course", Toast.LENGTH_SHORT).show();
+                        }
                         inputValue = spinner.getSelectedItem().toString() + "/" + date;
                     } catch (Exception e) {
                         Toast.makeText(getActivity().getApplicationContext(), "Error. Check Internet Connectivity.", Toast.LENGTH_SHORT).show();
