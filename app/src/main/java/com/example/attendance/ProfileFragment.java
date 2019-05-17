@@ -229,7 +229,7 @@ public class ProfileFragment extends Fragment {
         void onCallback(String value);
     }
     private void retrieveName(final retrieveNameCallback myCallback){
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("students").child(id.getText().toString());
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("students").child(id.getText().toString()).child("name");
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -263,10 +263,7 @@ public class ProfileFragment extends Fragment {
                             Toast.makeText(getContext(),"Upload Successful",Toast.LENGTH_LONG).show();
                             //code to set Url for student pp
                             profilePictureURL=pictureRef.getDownloadUrl().toString();
-                            String nod="-LdzLK93CWW0RkfyloZq";
-                            HashMap<String,Object> map=new HashMap<>();
-                            map.put("imageURL",profilePictureURL);
-                            mDatabase.child("courses").child("-LdzLK93CWW0RkfyloZq").child("students").child("1").child("imageURL").setValue(profilePictureURL);
+                            mDatabase.child("students").child(id.getText().toString()).child("imageURL").setValue(profilePictureURL);
 
 
 

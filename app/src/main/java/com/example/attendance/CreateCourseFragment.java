@@ -32,12 +32,18 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.DataFormatter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 
 public class CreateCourseFragment extends Fragment {
     private DatabaseReference mDatabase;
@@ -49,6 +55,8 @@ public class CreateCourseFragment extends Fragment {
     ArrayList<Student> students = new ArrayList<>();
     //private EditText inputCourseId,inputCourseName,inputCourseSection;
     private TextInputLayout inputLayoutCourseID,inputLayoutCourseName,inputLayoutCourseSection;
+    private static final int CAMERA_PERMISSION = 1;
+    private static final int STORAGE_PERMISSION = 2;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -157,13 +165,20 @@ public class CreateCourseFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference("courses");
         String courseID = mDatabase.push().getKey(); //Create new empty course node with unique ID
         Course course;
+        String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
         try {
             if(students.size() == 0 || id.equals("") || name.equals("") || section.equals(""))
                 Toast.makeText(getActivity().getApplicationContext(), "Please fill all data", Toast.LENGTH_SHORT).show();
             else {
                 course = new Course(id, name, section, students);
                 AddStudents(students); //Adds all students imported to the student node
-                mDatabase.child(courseID).setValue(course); //Add course to course node
+                mDatabase.child(course.getId()).child("ID").setValue(course.getId()); //Add course to course node
+                mDatabase.child(course.getId()).child("Name").setValue(course.getName());
+                DatabaseReference seDatabase;
+                seDatabase=mDatabase.child(course.getId()).child("Section").child(section).child(date);
+                for(Student s : students) {
+                    seDatabase.child(s.getId()).setValue(false);
+                }
                 Toast.makeText(getActivity().getApplicationContext(), "Course Created Successfully", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
@@ -175,7 +190,18 @@ public class CreateCourseFragment extends Fragment {
         sDatabase = FirebaseDatabase.getInstance().getReference("students");
         for(Student s : students) {
             try {
-                sDatabase.child(s.getId()).setValue(s.getName());
+                /*TODO add the students in this way:
+                * s_id
+                *       s_id
+                *       name
+                *       imageURL
+                * */
+                if(sDatabase.child(s.getId()).getKey()==null){
+                    sDatabase.child(s.getId()).setValue(s);
+                }
+                else
+                    Toast.makeText(getActivity().getApplicationContext(), "student exits", Toast.LENGTH_SHORT).show();
+
             } catch (Exception e) {
                 Toast.makeText(getActivity().getApplicationContext(), "Error Occurred", Toast.LENGTH_SHORT).show();
             }
@@ -183,6 +209,7 @@ public class CreateCourseFragment extends Fragment {
     }
 
     private void performFileSearch() {
+        isStoragePermissionGranted();
         // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file browser
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         // Filter to only show results that can be "opened", such as a
@@ -194,7 +221,7 @@ public class CreateCourseFragment extends Fragment {
     }
 
     public void readExcelFile(Context context, Uri u) {
-        //isStoragePermissionGranted();
+        isStoragePermissionGranted();
         DataFormatter fmt = new DataFormatter();
         try {
             // Creating Input Stream from uri
@@ -243,35 +270,42 @@ public class CreateCourseFragment extends Fragment {
             }
         } catch (Exception e) {
             Toast.makeText(context,"Please choose a .xls file",Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
         return;
     }
     //Convert content uri to a file path
     private String getPath(Uri uri)
     {
-        String[] projection = { MediaStore.Images.Media.DATA };
+        /*String[] projection = { MediaStore.Images.Media.DATA };
         Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
         if (cursor == null) return null;
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         String s=cursor.getString(column_index);
-        cursor.close();
-        return s;
+        Toast.makeText(getContext(),s,Toast.LENGTH_LONG).show();
+        cursor.close();*/
+        String p=ImagePath.getPath(getContext(),uri);
+        Toast.makeText(getContext(),p,Toast.LENGTH_LONG).show();
+        return p;
     }
     //Check storage permissions
-    /*private  boolean isStoragePermissionGranted() {
+    private  boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (getActivity().checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 return true;
             } else {
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION);
                 return false;
             }
         }
         else { //permission is automatically granted on sdk<23 upon installation
             return true;
         }
-    }*/
+    }
+
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
@@ -279,10 +313,14 @@ public class CreateCourseFragment extends Fragment {
             // Pull that URI using resultData.getData().
             if (resultData != null) {
                 uriData = resultData.getData();
-                readExcelFile(getActivity().getApplicationContext(), uriData);
+                if(getActivity()==null){
+                    Toast.makeText(getActivity(), "nullpointer getActivity",Toast.LENGTH_SHORT).show();
+                }
+                else
+                    readExcelFile(getActivity(), uriData);
             }
         }else{
-            Toast.makeText(getActivity().getApplicationContext(), "Exited",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Exited",Toast.LENGTH_SHORT).show();
         }
     }
 }
