@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -172,7 +173,7 @@ public class Logs extends Fragment {
                namePop.setText(student.getName());
                idPop.setText(student.getId());
                popProfile=customView.findViewById(R.id.pop_profile);
-               final long TWO_Megabyte=(1024*1024)*2;
+               final long TWO_Megabyte=(1024*1024)*5;
                storageRef.getBytes(TWO_Megabyte).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                    @Override
                    public void onSuccess(byte[] bytes) {
@@ -182,6 +183,12 @@ public class Logs extends Fragment {
                        popProfile.setImageBitmap(Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true));
                        popupWindow=new PopupWindow(customView,ViewGroup.LayoutParams.WRAP_CONTENT, 1100);
                        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER,0,0);
+                   }
+
+               }).addOnFailureListener(new OnFailureListener() {
+                   @Override
+                   public void onFailure(@NonNull Exception e) {
+                       Toast.makeText(getContext(),"Profile picture unavailable",Toast.LENGTH_LONG).show();
                    }
                });
 
@@ -281,8 +288,11 @@ public class Logs extends Fragment {
                         sDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                students.add(dataSnapshot.child(StudentKey.getKey()).getValue(Student.class));
-                                suAdapter.notifyDataSetChanged();
+                                if(StudentKey.getValue().equals(true)) {
+                                    students.add(dataSnapshot.child(StudentKey.getKey()).getValue(Student.class));
+                                    suAdapter.notifyDataSetChanged();
+                                }
+
                             }
 
                             @Override
