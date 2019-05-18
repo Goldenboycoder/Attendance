@@ -46,7 +46,6 @@ import static android.support.constraint.Constraints.TAG;
 public class GeneratorFragment extends Fragment {
     ImageView qrImage;
     Button start;
-    Button update;
     String inputValue; //Text to transform to QR code
     Bitmap bitmap;
     QRGEncoder qrgEncoder;
@@ -67,34 +66,16 @@ public class GeneratorFragment extends Fragment {
         qrImage = v.findViewById(R.id.QR_Image);
         start = v.findViewById(R.id.start);
         spinner = v.findViewById(R.id.spinner);
-        update=v.findViewById(R.id.btnupdateadapter);
+
 
         //Load courses
         loadCourses(new MyCallback() {
             @Override
             public void onCallback() {
-                /*for (int i = 0; i < courses.size(); i++) {
-                    CourseIDs.add(courses.get(i).getId());
-                }*/
-               /* adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, sCourses);
-                //created a customized layout for the selected item
-               //adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,sCourses);
-                //created a customized item drop down layout
-                adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, sCourses);
+                adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 spinner.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-                Toast.makeText(getActivity().getApplicationContext(), spinner.getAdapter().getCount()+"", Toast.LENGTH_SHORT).show();
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        Toast.makeText(getActivity().getApplicationContext(), position+"", Toast.LENGTH_SHORT).show();
-                    }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });*/
                 ProgressBar.setVisibility(View.INVISIBLE);
             }
         });
@@ -156,28 +137,10 @@ public class GeneratorFragment extends Fragment {
 
             }
         });
-        update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, sCourses);
-                adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-                spinner.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-                Toast.makeText(getActivity().getApplicationContext(), spinner.getAdapter().getCount()+"", Toast.LENGTH_SHORT).show();
-            }
-        });
+
         return v;
     }
-    /*public void updateadapter(View v){
-        adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, sCourses);
-        //created a customized layout for the selected item
-        //adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,sCourses);
-        //created a customized item drop down layout
-        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-        Toast.makeText(getActivity().getApplicationContext(), spinner.getAdapter().getCount()+"", Toast.LENGTH_SHORT).show();
-    }*/
+
 
     private void createEvent(){
         String[]parts=inputValue.split("/");
@@ -294,6 +257,7 @@ public class GeneratorFragment extends Fragment {
                                     if(dataSnapshot.exists()){
                                         for(DataSnapshot sectionKeySnapshot : dataSnapshot.getChildren()){
                                             sCourses.add(uniqueKeySnapshot.getKey()+"-"+sectionKeySnapshot.getKey());
+                                            adapter.notifyDataSetChanged();
                                         }
                                     }
                                 }

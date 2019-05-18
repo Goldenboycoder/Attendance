@@ -23,6 +23,7 @@
         android:id="@+id/genre"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/colorBlueDark"
         android:layout_below="@id/S_ID" />
 
     <TextView

@@ -16,10 +16,13 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.MyViewHo
 
         public MyViewHolder(View view) {
             super(view);
-            title = (TextView) view.findViewById(R.id.title);
+            title = (TextView) view.findViewById(R.id.S_ID);
             genre = (TextView) view.findViewById(R.id.genre);
             //year = (TextView) view.findViewById(R.id.year);
         }
+    }
+    public StudentAdapter(List<Student> studentList) {
+        this.studentList = studentList;
     }
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

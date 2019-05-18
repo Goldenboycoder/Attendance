@@ -155,6 +155,9 @@ public class HomeActivity extends AppCompatActivity {
             case 5 :
                 myFragment = new LoginFragment();
                 break;
+            case 6:
+                myFragment=new Logs();
+                break;
             default:
                 myFragment = new ProfileFragment();
         }
@@ -177,7 +180,7 @@ public class HomeActivity extends AppCompatActivity {
         if(isAdmin){
             CustomMenu.add(0,0,0,"Create Course");
             CustomMenu.add(0,1,0,"Generate QR code");
-            CustomMenu.add(0,2,0,"Logs");
+            CustomMenu.add(0,6,0,"Logs");
             CustomMenu.add(0,3,0,"Logout");
 
             CustomMenu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_create_course));
