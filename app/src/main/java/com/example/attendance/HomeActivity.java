@@ -177,11 +177,13 @@ public class HomeActivity extends AppCompatActivity {
         if(isAdmin){
             CustomMenu.add(0,0,0,"Create Course");
             CustomMenu.add(0,1,0,"Generate QR code");
-            CustomMenu.add(0,2,0,"Logout");
+            CustomMenu.add(0,2,0,"Logs");
+            CustomMenu.add(0,3,0,"Logout");
 
             CustomMenu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_create_course));
             CustomMenu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_take_attendance));
-            CustomMenu.getItem(2).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_logout));
+            CustomMenu.getItem(2).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_logs));
+            CustomMenu.getItem(3).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_logout));
         }
         else{
             CustomMenu.add(0,3,0,"Profile");

@@ -160,9 +160,6 @@ public class GeneratorFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, sCourses);
-                //created a customized layout for the selected item
-                //adapter = new ArrayAdapter<>(getActivity(),R.layout.spinner_item,sCourses);
-                //created a customized item drop down layout
                 adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 spinner.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
