@@ -179,7 +179,7 @@ public class Logs extends Fragment {
                        Matrix matrix=new Matrix();
                        matrix.postRotate(270);
                        popProfile.setImageBitmap(Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true));
-                       popupWindow=new PopupWindow(customView,500, 700);
+                       popupWindow=new PopupWindow(customView,500, 900);
                        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER,0,0);
                        progressBar.setVisibility(View.INVISIBLE);
                    }
