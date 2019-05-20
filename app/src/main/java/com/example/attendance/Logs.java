@@ -1,11 +1,9 @@
 package com.example.attendance;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -16,21 +14,19 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,7 +58,9 @@ public class Logs extends Fragment {
     private DatabaseReference sDatabase;
     Button fetch;
 
-    List<Student> students=new ArrayList<>();
+    List<Student> students = new ArrayList<>();
+    List<Boolean> attended = new ArrayList<>();
+    TextView absenses;
     RecyclerView recyclerView;
     StudentAdapter suAdapter;
     PopupWindow popupWindow;
@@ -73,26 +71,27 @@ public class Logs extends Fragment {
     TextView idPop;
     CircleImageView popProfile;
     StorageReference storageRef;
+    ProgressBar progressBar;
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v= inflater.inflate(R.layout.fragment_logs, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_logs, container, false);
+        progressBar = v.findViewById(R.id.progressBar2);
         constraintLayout=v.findViewById(R.id.frameLayout3);
+        absenses = v.findViewById(R.id.absenses);
         spCourse=v.findViewById(R.id.spCourse);
         spSection=v.findViewById(R.id.spSection);
         spDate=v.findViewById(R.id.spDate);
         fetch=v.findViewById(R.id.btnGet);
         recyclerView=v.findViewById(R.id.recycler_view);
+        fetch.setEnabled(false);
         loadCourses(new MyCourseCallback() {
             @Override
             public void onCallback() {
                 cAdapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, courseId);
                 cAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 spCourse.setAdapter(cAdapter);
-
             }
         });
         spCourse.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -108,10 +107,8 @@ public class Logs extends Fragment {
                     }
                 },spCourse.getSelectedItem().toString());
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
         spSection.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -121,9 +118,10 @@ public class Logs extends Fragment {
                 loadDates(new MyDatesCallback() {
                     @Override
                     public void onCallback() {
-                        dAdapter=new ArrayAdapter<String>(getContext(), R.layout.spinner_item, date);
+                        dAdapter=new ArrayAdapter(getContext(), R.layout.spinner_item, date);
                         dAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                         spDate.setAdapter(dAdapter);
+                        fetch.setEnabled(true);
                     }
                 },spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString());
             }
@@ -140,13 +138,14 @@ public class Logs extends Fragment {
                 loadStudents(new MyStudentsCallback() {
                     @Override
                     public void onCallback() {
-                        suAdapter=new StudentAdapter(students);
+                        suAdapter=new StudentAdapter(students, attended,spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString(), Logs.this);
                         RecyclerView.LayoutManager mLayoutManager=new LinearLayoutManager(getContext());
                         recyclerView.setLayoutManager(mLayoutManager);
                         recyclerView.setItemAnimator(new DefaultItemAnimator());
                         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),LinearLayoutManager.VERTICAL));
                         recyclerView.setAdapter(suAdapter);
-                        Toast.makeText(getActivity().getApplicationContext(),suAdapter.getItemCount()+"", Toast.LENGTH_SHORT).show();
+                        //set total absentees
+                        setAbsenses();
                     }
                 },spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString());
 
@@ -157,12 +156,11 @@ public class Logs extends Fragment {
            @Override
            public void onClick(View view, int position) {
                student=students.get(position);
-               //check for absence
-
            }
 
            @Override
            public void onLongClick(View view, int position) {
+               progressBar.setVisibility(View.VISIBLE);
                student=students.get(position);
                storageRef=FirebaseStorage.getInstance().getReferenceFromUrl("gs://attendanceapp-c1175.appspot.com/").child("students_pics").child(student.getId()+".jpg");
                LayoutInflater layoutInflater=(LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -181,39 +179,37 @@ public class Logs extends Fragment {
                        Matrix matrix=new Matrix();
                        matrix.postRotate(270);
                        popProfile.setImageBitmap(Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true));
-                       popupWindow=new PopupWindow(customView,ViewGroup.LayoutParams.WRAP_CONTENT, 1100);
+                       popupWindow=new PopupWindow(customView,500, 700);
                        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER,0,0);
+                       progressBar.setVisibility(View.INVISIBLE);
                    }
 
                }).addOnFailureListener(new OnFailureListener() {
                    @Override
                    public void onFailure(@NonNull Exception e) {
                        Toast.makeText(getContext(),"Profile picture unavailable",Toast.LENGTH_LONG).show();
+                       progressBar.setVisibility(View.INVISIBLE);
                    }
                });
-
-               //popupWindow.showAtLocation(constraintLayout, Gravity.CENTER,0,0);
                closePop.setOnClickListener(new View.OnClickListener() {
                    @Override
                    public void onClick(View v) {
                        popupWindow.dismiss();
                    }
                });
-
            }
        }));
         return v;
     }
 
     private void loadCourses(final MyCourseCallback myCourseCallback){
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("courses");
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("records");
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    for(DataSnapshot CourseKey : dataSnapshot.getChildren()){
-                        courseId.add(CourseKey.getKey());
-                        //cAdapter.notifyDataSetChanged();
+                    for(DataSnapshot CourseID : dataSnapshot.getChildren()){
+                        courseId.add(CourseID.getKey());
                         Toast.makeText(getActivity().getApplicationContext(),"loading courses", Toast.LENGTH_SHORT).show();
                     }
                     myCourseCallback.onCallback();
@@ -229,15 +225,15 @@ public class Logs extends Fragment {
     public interface MyCourseCallback {
         void onCallback();
     }
+
     private void loadSection(final MySectionCallback mySectionCallback,String c){
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("courses").child(c).child("Section");
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("records").child(c);
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
                     for(DataSnapshot SectionKey : dataSnapshot.getChildren()){
                         section.add(SectionKey.getKey());
-                        //sAdapter.notifyDataSetChanged();
                         Toast.makeText(getActivity().getApplicationContext(),"loading sections", Toast.LENGTH_SHORT).show();
                     }
                     mySectionCallback.onCallback();
@@ -254,14 +250,13 @@ public class Logs extends Fragment {
         void onCallback();
     }
     private void loadDates(final MyDatesCallback myDatesCallback,String c,String s){
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("courses").child(c).child("Section").child(s);
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("records").child(c).child(s);
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
                     for(DataSnapshot DateKey : dataSnapshot.getChildren()){
                         date.add(DateKey.getKey());
-                        //dAdapter.notifyDataSetChanged();
                         Toast.makeText(getActivity().getApplicationContext(),"loading dates", Toast.LENGTH_SHORT).show();
                     }
                     myDatesCallback.onCallback();
@@ -278,26 +273,22 @@ public class Logs extends Fragment {
         void onCallback();
     }
     private void loadStudents(final MyStudentsCallback myStudentsCallback,String c,String s,String d){
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("courses").child(c).child("Section").child(s).child(d);
-        sDatabase=FirebaseDatabase.getInstance().getReference().child("students");
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("records").child(c).child(s).child(d);
+        sDatabase = FirebaseDatabase.getInstance().getReference().child("students");
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
                     for(final DataSnapshot StudentKey : dataSnapshot.getChildren()){
+                        attended.add((Boolean)StudentKey.getValue());
                         sDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if(StudentKey.getValue().equals(true)) {
-                                    students.add(dataSnapshot.child(StudentKey.getKey()).getValue(Student.class));
-                                    suAdapter.notifyDataSetChanged();
-                                }
-
+                                students.add(dataSnapshot.child(StudentKey.getKey()).getValue(Student.class));
+                                suAdapter.notifyDataSetChanged();
                             }
-
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
-
                             }
                         });
 
@@ -315,6 +306,16 @@ public class Logs extends Fragment {
     }
     public interface MyStudentsCallback {
         void onCallback();
+    }
+
+    public void setAbsenses() {
+        int count = 0;
+        for(int i = 0; i < attended.size(); i++) {
+            if(attended.get(i)) {
+                count ++;
+            }
+        }
+        absenses.setText("Total Absentees: " + count);
     }
 }
 

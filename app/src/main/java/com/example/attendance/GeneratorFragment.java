@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -14,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,8 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,7 +36,6 @@ import java.util.regex.Pattern;
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
 
-import static android.support.constraint.Constraints.TAG;
 
 
 public class GeneratorFragment extends Fragment {
@@ -51,13 +46,10 @@ public class GeneratorFragment extends Fragment {
     QRGEncoder qrgEncoder;
     Spinner spinner;
     ArrayAdapter<String> adapter;
-    ArrayList<String> CourseIDs = new ArrayList<>();
-    ArrayList<Course> courses = new ArrayList<>();
     ArrayList<String> sCourses=new ArrayList<>();
     private DatabaseReference mDatabase;
     private DatabaseReference seDatabase;
     ProgressBar ProgressBar;
-    String cKey=null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,32 +58,18 @@ public class GeneratorFragment extends Fragment {
         qrImage = v.findViewById(R.id.QR_Image);
         start = v.findViewById(R.id.start);
         spinner = v.findViewById(R.id.spinner);
-
-
+        start.setEnabled(false);
         //Load courses
         loadCourses(new MyCallback() {
             @Override
             public void onCallback() {
-                adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, sCourses);
+                adapter = new ArrayAdapter(getContext(), R.layout.spinner_item, sCourses);
                 adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 spinner.setAdapter(adapter);
-
                 ProgressBar.setVisibility(View.INVISIBLE);
+                start.setEnabled(true);
             }
         });
-
-
-       /* for(int i=0;i<CourseIDs.size();i++) {
-            loadSections(new MySectionCallback() {
-                @Override
-                public void onCallback(ArrayList<String> sections) {
-                    for(int j=0;j<sections.size();j++){
-                        sCourses.add(sections.get(j));
-                        Toast.makeText(getActivity().getApplicationContext(),sections.get(j), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            },CourseIDs.get(i) );
-        }*/
 
         //Generate QR code
         start.setOnClickListener(new View.OnClickListener() {
@@ -141,7 +119,6 @@ public class GeneratorFragment extends Fragment {
         return v;
     }
 
-
     private void createEvent(){
         String[]parts=inputValue.split("/");
         String date=parts[1];
@@ -149,95 +126,52 @@ public class GeneratorFragment extends Fragment {
         String[]subP=courseidS.split("-");
         String courseId=subP[0];
         String section=subP[1];
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("courses").child(courseId).child("Section").child(section).child(date);
-        seDatabase=FirebaseDatabase.getInstance().getReference().child("courses").child(courseId).child("Section").child(section);
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("records").child(courseId).child(section).child(date); //destination reference for record
+        seDatabase = FirebaseDatabase.getInstance().getReference().child("courses").child(courseId).child("Section").child(section); //source reference for students
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    Toast.makeText(getActivity().getApplicationContext(),"date exists", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(),"event exists", Toast.LENGTH_SHORT).show();
                 }
-                else{
+                else{ //if qr record doesnt exist yet, create it
                     seDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            for(DataSnapshot date : dataSnapshot.getChildren()){
-                                if(date.exists()){
-                                    copyRecord(date.getRef(),mDatabase);
-                                    break;
-                                }
+                            for(DataSnapshot students : dataSnapshot.getChildren()){
+                                if(students.exists())
+                                    copyRecord(students.getRef(),mDatabase);
                             }
                         }
-
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
                         }
                     });
-
-                    Toast.makeText(getActivity().getApplicationContext(),"date created", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(),"event created", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
-
     }
+
     private void copyRecord(DatabaseReference fromPath,final DatabaseReference toPath){
         ValueEventListener valueEventListener=new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                toPath.setValue(dataSnapshot.getValue()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isComplete()){
-                            Log.d(TAG,"Success");
-                        }
-                        else{
-                            Log.d(TAG,"copy Failed");
-                        }
-                    }
-                });
+                toPath.child(dataSnapshot.getValue().toString()).setValue(false);
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) { }
         };
         fromPath.addListenerForSingleValueEvent(valueEventListener);
     }
-    //load sections
-    /*private void loadSections(final MySectionCallback mySectionCallback,String c){
-            seDatabase=FirebaseDatabase.getInstance().getReference().child("courses").child(c).child("Section");
-            final String course=c;
-            seDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()){
-                        for(DataSnapshot sectionKey : dataSnapshot.getChildren()){
-                            Section.add(course+"-"+sectionKey.getKey());
-                            Toast.makeText(getActivity().getApplicationContext(),"loading saection", Toast.LENGTH_SHORT).show();
-                        }
-                        mySectionCallback.onCallback(Section);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-    }*/
-
 
     //Loads courses into the app
     private void loadCourses(final MyCallback myCallback) {
         //Reading courses
-
         mDatabase = FirebaseDatabase.getInstance().getReference().child("courses");
-
         final Pattern p=Pattern.compile("...\\d{3}");//eg: CSI300
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -248,7 +182,6 @@ public class GeneratorFragment extends Fragment {
                         //Store courses into arraylist
                         //courses.add(uniqueKeySnapshot.getValue(Course.class));
                         if(p.matcher(uniqueKeySnapshot.getKey()).matches()){
-                            //cKey=uniqueKeySnapshot.getKey();
                             //get Sections
                             seDatabase=FirebaseDatabase.getInstance().getReference().child("courses").child(uniqueKeySnapshot.getKey()).child("Section");
                             seDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -280,9 +213,7 @@ public class GeneratorFragment extends Fragment {
             }
         });
     }
-    public interface MySectionCallback{
-        void onCallback(ArrayList<String> sections);
-    }
+
     public interface MyCallback {
         void onCallback();
     }

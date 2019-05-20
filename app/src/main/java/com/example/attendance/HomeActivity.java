@@ -1,19 +1,13 @@
 package com.example.attendance;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
-import android.os.StrictMode;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -31,10 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
@@ -45,16 +37,17 @@ public class HomeActivity extends AppCompatActivity {
     private static final int STORAGE_PERMISSION = 2;
     public final String Student_Name = "S_Name";
     public final String Student_ID = "S_ID";
-    private boolean isAdmin;
+    private boolean isAdmin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         //Retrieve Shared Preferences
         prefs = getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
-        isAdmin =  prefs.getBoolean("isAdmin",false);
-
-
+        isAdmin = prefs.getBoolean("isAdmin",false);
+        //Check permissions
+        if(checkAndRequestPermissions());
         //Set up the navigation drawer
         NavigationView nvDrawer;
         setContentView(R.layout.activity_homescreen);
@@ -92,30 +85,14 @@ public class HomeActivity extends AppCompatActivity {
             }
             username.setText("User: " + prefs.getString(Student_Name, "N/A") + "\nID : " + prefs.getString(Student_ID, "N/A"));
             //load user pfp
-            if(isStoragePermissionGranted()) {
-                File pfpFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
-                if (pfpFile.exists()) {
-                    Bitmap myBitmap = BitmapFactory.decodeFile(pfpFile.getAbsolutePath());
-                    pfp.setImageBitmap(myBitmap);
-                }
+            File pfpFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "pfp.jpg");
+            if (pfpFile.exists()) {
+                Bitmap myBitmap = BitmapFactory.decodeFile(pfpFile.getAbsolutePath());
+                pfp.setImageBitmap(myBitmap);
             }
-
             initialFragment = new ProfileFragment();
         }
         fragmentManager.beginTransaction().replace(R.id.fcontent, initialFragment).addToBackStack(null).commit();
-    }
-    private  boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (this.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION);
-                return false;
-            }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            return true;
-        }
     }
 
     //Perform Menu Item Action
@@ -123,7 +100,7 @@ public class HomeActivity extends AppCompatActivity {
         Fragment myFragment = null;
         switch (menuItem.getItemId()){
             case 0:
-                myFragment = new CreateCourseFragment();
+                myFragment = new CourseManagementFragment();
                 break;
             case 1:
                 myFragment = new GeneratorFragment();
@@ -150,7 +127,8 @@ public class HomeActivity extends AppCompatActivity {
                 myFragment = new ProfileFragment();
                 break;
             case 4 :
-                launchScanner();
+                Intent intent = new Intent(this, ScannerActivity.class);
+                startActivity(intent);
                 break;
             case 5 :
                 myFragment = new LoginFragment();
@@ -178,7 +156,7 @@ public class HomeActivity extends AppCompatActivity {
     public void loadMenuItems(NavigationView nv){
         Menu CustomMenu = nv.getMenu();
         if(isAdmin){
-            CustomMenu.add(0,0,0,"Create Course");
+            CustomMenu.add(0,0,0,"Manage Courses");
             CustomMenu.add(0,1,0,"Generate QR code");
             CustomMenu.add(0,6,0,"Logs");
             CustomMenu.add(0,2,0,"Logout");
@@ -198,25 +176,13 @@ public class HomeActivity extends AppCompatActivity {
             CustomMenu.getItem(2).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_login));
         }
     }
-
-    public void launchScanner() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION);
-        } else {
-            Intent intent = new Intent(this, ScannerActivity.class);
-            startActivity(intent);
-        }
-    }
-
     //Checks for camera permission
    @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case CAMERA_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Intent intent = new Intent(this, ScannerActivity.class);
-                    startActivity(intent);
+
                 } else {
                     Toast.makeText(this, "Please grant camera permission to use the QR Scanner", Toast.LENGTH_SHORT).show();
                     this.finish();
@@ -247,25 +213,28 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-   /* @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Toast.makeText(getApplicationContext(),"in result",Toast.LENGTH_SHORT).show();
-        if (resultCode == RESULT_OK) {
-            Toast.makeText(getApplicationContext(),"in result 0k",Toast.LENGTH_SHORT).show();
-            if (requestCode == 333) {
-                Toast.makeText(getApplicationContext(),"in rquest 333",Toast.LENGTH_SHORT).show();
-                if (data != null) {
-                    Toast.makeText(getApplicationContext(),"data not null",Toast.LENGTH_SHORT).show();
-                    //getting captured image
-                    Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    profilPic.setImageBitmap(photo);
-                }
-                else
-                    Toast.makeText(getApplicationContext(),"data empty",Toast.LENGTH_SHORT).show();
 
-            }
+    public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
+
+    private  boolean checkAndRequestPermissions() {
+        int camera = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA);
+        int storage = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int loc = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION);
+        int loc2 = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+        List<String> listPermissionsNeeded = new ArrayList<>();
+
+        if (camera != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
         }
-
-    }*/
+        if (storage != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (!listPermissionsNeeded.isEmpty())
+        {
+            ActivityCompat.requestPermissions(this,listPermissionsNeeded.toArray
+                    (new String[listPermissionsNeeded.size()]),REQUEST_ID_MULTIPLE_PERMISSIONS);
+            return false;
+        }
+        return true;
+    }
 }

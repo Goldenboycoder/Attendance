@@ -2,7 +2,6 @@ package com.example.attendance;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -10,12 +9,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,60 +24,88 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
+import org.apache.poi.hpsf.Section;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.DataFormatter;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 
-public class CreateCourseFragment extends Fragment {
+public class CreateCourseFragment extends Fragment implements Serializable {
     private DatabaseReference mDatabase;
     private DatabaseReference sDatabase;
     EditText courseId;
     EditText courseName;
-    EditText courseSection;
     Uri uriData;
     ArrayList<Student> students = new ArrayList<>();
-    //private EditText inputCourseId,inputCourseName,inputCourseSection;
+    ArrayList<Course> courses = new ArrayList<>();
     private TextInputLayout inputLayoutCourseID,inputLayoutCourseName,inputLayoutCourseSection;
-    private static final int CAMERA_PERMISSION = 1;
     private static final int STORAGE_PERMISSION = 2;
+    int totalsections;
+    boolean exists = false;
 
+    public static CreateCourseFragment newInstance (ArrayList<Course> courses) {
+        CreateCourseFragment nf = new CreateCourseFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("courses", courses);
+        nf.setArguments(args);
+        return nf;
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_create_course, container, false);
+        this.courses = (ArrayList<Course>)getArguments().getSerializable("courses");
+        getArguments().remove("courses");
         Button add = v.findViewById(R.id.CreateCourseBtn);
         courseId = v.findViewById(R.id.CourseIdET);
         courseName = v.findViewById(R.id.CourseNameET);
-        courseSection = v.findViewById(R.id.CourseSectionET);
 
         inputLayoutCourseID=v.findViewById(R.id.input_layout_courseid);
         inputLayoutCourseName=v.findViewById(R.id.input_layout_coursename);
-        inputLayoutCourseSection=v.findViewById(R.id.input_layout_coursesection);
 
         courseId.addTextChangedListener(new MyTextWatcher(courseId));
         courseName.addTextChangedListener(new MyTextWatcher(courseName));
-        courseSection.addTextChangedListener(new MyTextWatcher(courseSection));
 
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddCourse(courseId.getText().toString(), courseName.getText().toString(), courseSection.getText().toString());
+                int val = 0;
+                for(Course c : courses) {
+                    if(c.getId().equals(courseId.getText().toString())) {
+                        val = 1;
+                        Toast.makeText(getActivity().getApplicationContext(), "already exists", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                if(val == 0) {
+                    AddCourse(courseId.getText().toString(), courseName.getText().toString(), "A");
+                    getFragmentManager().popBackStack();
+                }
+                else{
+                    getNbOfSections(new MySectionCallback2() {
+                        @Override
+                        public void onCallback() {
+                            if(totalsections <= 26)
+                                AddCourse(courseId.getText().toString(), courseName.getText().toString(), "" + (char)(totalsections + 65));
+                            getFragmentManager().popBackStack();
+                        }
+                    }, courseId.getText().toString());
+                }
             }
         });
         Button importbtn = v.findViewById(R.id.importBtn);
@@ -126,17 +154,6 @@ public class CreateCourseFragment extends Fragment {
 
             return true;
         }
-        private boolean validateSection() {
-            if (courseSection.getText().toString().trim().isEmpty()) {
-                inputLayoutCourseSection.setError(getString(R.string.err_msg_section));
-                requestFocus(courseSection);
-                return false;
-            } else {
-                inputLayoutCourseSection.setErrorEnabled(false);
-            }
-
-            return true;
-        }
 
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         }
@@ -147,37 +164,31 @@ public class CreateCourseFragment extends Fragment {
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
                 case R.id.CourseIdET:
-                    validateName();
+                    validateID();
                     break;
                 case R.id.CourseNameET:
                     validateName();
-                    break;
-                case R.id.CourseSectionET:
-                    validateSection();
                     break;
             }
         }
     }
 
-
-
     private void AddCourse(String id, String name, String section) {
         mDatabase = FirebaseDatabase.getInstance().getReference("courses");
-        String courseID = mDatabase.push().getKey(); //Create new empty course node with unique ID
         Course course;
-        String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+        //String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
         try {
             if(students.size() == 0 || id.equals("") || name.equals("") || section.equals(""))
-                Toast.makeText(getActivity().getApplicationContext(), "Please fill all data", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), "Please provide all required data", Toast.LENGTH_SHORT).show();
             else {
-                course = new Course(id, name, section, students);
+                course = new Course(id, name);
                 AddStudents(students); //Adds all students imported to the student node
-                mDatabase.child(course.getId()).child("ID").setValue(course.getId()); //Add course to course node
-                mDatabase.child(course.getId()).child("Name").setValue(course.getName());
+                if(section.equals("A"))
+                    mDatabase.child(course.getId()).setValue(course); //Add course to course node
                 DatabaseReference seDatabase;
-                seDatabase=mDatabase.child(course.getId()).child("Section").child(section).child(date);
-                for(Student s : students) {
-                    seDatabase.child(s.getId()).setValue(false);
+                seDatabase = mDatabase.child(course.getId()).child("Section").child(section);
+                for(int i = 0; i < students.size(); i++) {
+                    seDatabase.child("" + i).setValue(students.get(i).getId());
                 }
                 Toast.makeText(getActivity().getApplicationContext(), "Course Created Successfully", Toast.LENGTH_SHORT).show();
             }
@@ -187,25 +198,51 @@ public class CreateCourseFragment extends Fragment {
     }
 
     private void AddStudents(ArrayList<Student> students) {
-        sDatabase = FirebaseDatabase.getInstance().getReference("students");
         for(Student s : students) {
             try {
-                /*TODO add the students in this way:
-                * s_id
-                *       s_id
-                *       name
-                *       imageURL
-                * */
-                if(sDatabase.child(s.getId()).getKey()==null){
-                    sDatabase.child(s.getId()).setValue(s);
-                }
-                else
-                    Toast.makeText(getActivity().getApplicationContext(), "student exits", Toast.LENGTH_SHORT).show();
+                sDatabase = FirebaseDatabase.getInstance().getReference("students").child(s.getId());
+                DatabaseReference eDatabase = FirebaseDatabase.getInstance().getReference("students");
+                sDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists()) {
+                            exists = true;
+                        }
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+                if(!exists) {
+                    eDatabase.child(s.getId()).setValue(s);
+                }
             } catch (Exception e) {
                 Toast.makeText(getActivity().getApplicationContext(), "Error Occurred", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public void getNbOfSections(final MySectionCallback2 mySectionCallback, String id){
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("courses").child(id).child("Section");
+        totalsections = 0;
+        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    totalsections = (int)(dataSnapshot.getChildrenCount());
+                    Toast.makeText(getActivity().getApplicationContext(), "values : "+ totalsections , Toast.LENGTH_SHORT).show();
+                    mySectionCallback.onCallback();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+    }
+    public interface MySectionCallback2 {
+        void onCallback();
     }
 
     private void performFileSearch() {
@@ -220,12 +257,13 @@ public class CreateCourseFragment extends Fragment {
         startActivityForResult(intent, 1);
     }
 
-    public void readExcelFile(Context context, Uri u) {
+    public void readExcelFile() {
         isStoragePermissionGranted();
         DataFormatter fmt = new DataFormatter();
         try {
+            Log.d("urid", "readExcelFile: " + uriData);
             // Creating Input Stream from uri
-            FileInputStream myInput = new FileInputStream(new File(getPath(u)));
+            FileInputStream myInput = new FileInputStream(new File(getPath(uriData)));
             // Create a POIFSFileSystem object
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
             // Create a workbook using the File System
@@ -269,7 +307,7 @@ public class CreateCourseFragment extends Fragment {
                 }
             }
         } catch (Exception e) {
-            Toast.makeText(context,"Please choose a .xls file",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),"Please choose a .xls file",Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
         return;
@@ -277,17 +315,14 @@ public class CreateCourseFragment extends Fragment {
     //Convert content uri to a file path
     private String getPath(Uri uri)
     {
-        /*String[] projection = { MediaStore.Images.Media.DATA };
+        String[] projection = { MediaStore.Images.Media.DATA };
         Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
         if (cursor == null) return null;
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         String s=cursor.getString(column_index);
-        Toast.makeText(getContext(),s,Toast.LENGTH_LONG).show();
-        cursor.close();*/
-        String p=ImagePath.getPath(getContext(),uri);
-        Toast.makeText(getContext(),p,Toast.LENGTH_LONG).show();
-        return p;
+        cursor.close();
+        return s;
     }
     //Check storage permissions
     private  boolean isStoragePermissionGranted() {
@@ -304,8 +339,6 @@ public class CreateCourseFragment extends Fragment {
         }
     }
 
-
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
@@ -313,11 +346,7 @@ public class CreateCourseFragment extends Fragment {
             // Pull that URI using resultData.getData().
             if (resultData != null) {
                 uriData = resultData.getData();
-                if(getActivity()==null){
-                    Toast.makeText(getActivity(), "nullpointer getActivity",Toast.LENGTH_SHORT).show();
-                }
-                else
-                    readExcelFile(getActivity(), uriData);
+                readExcelFile();
             }
         }else{
             Toast.makeText(getActivity(), "Exited",Toast.LENGTH_SHORT).show();

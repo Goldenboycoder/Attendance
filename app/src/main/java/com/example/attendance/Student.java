@@ -5,7 +5,6 @@ public class Student {
     String id;
     String imageURL;
 
-
     public Student() {
     }
 

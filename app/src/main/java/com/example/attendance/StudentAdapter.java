@@ -1,42 +1,75 @@
 package com.example.attendance;
 
-import android.graphics.Movie;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.chauthai.swipereveallayout.ViewBinderHelper;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 
 public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.MyViewHolder> {
     private List<Student> studentList;
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView title, year, genre;
+    private List<Boolean> attended;
+    private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
+    String c;
+    String s;
+    String d;
+    Logs ml;
 
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        public TextView name, id, status, changeStatus;
         public MyViewHolder(View view) {
             super(view);
-            title = (TextView) view.findViewById(R.id.S_ID);
-            genre = (TextView) view.findViewById(R.id.genre);
-            //year = (TextView) view.findViewById(R.id.year);
+            name = view.findViewById(R.id.s_name);
+            id = view.findViewById(R.id.s_id);
+            status = view.findViewById(R.id.status);
+            changeStatus = view.findViewById(R.id.ChangeStatus);
+        }
+
+        //Bind on click listeners to each item
+        public void bind() {
+            changeStatus.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("records").child(c).child(s).child(d).child(studentList.get(getAdapterPosition()).getId());
+                    attended.set(getAdapterPosition(), !(attended.get(getAdapterPosition())) );
+                    mDatabase.setValue(attended.get(getAdapterPosition()));
+                    notifyItemChanged(getAdapterPosition());
+                    ml.setAbsenses();
+                }
+            });
         }
     }
-    public StudentAdapter(List<Student> studentList) {
+
+    public StudentAdapter(List<Student> studentList, List<Boolean> attended, String c, String s, String d, Logs ml) {
+        viewBinderHelper.setOpenOnlyOne(true);
         this.studentList = studentList;
+        this.attended = attended;
+        this.c = c;
+        this.s = s;
+        this.d = d;
+        this.ml = ml;
     }
+
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.student_list_row, parent, false);
-
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.student_list_row, parent, false);
         return new MyViewHolder(itemView);
     }
+
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Student student = studentList.get(position);
-        holder.title.setText(student.getName());
-        holder.genre.setText(student.getId());
-        //holder.year.setText(student.getYear());
+        Boolean bool = attended.get(position);
+        holder.name.setText(student.getName());
+        holder.id.setText(student.getId());
+        holder.status.setText(bool ? "" : "Absent");
+        holder.bind();
     }
 
     @Override

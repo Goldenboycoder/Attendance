@@ -49,7 +49,7 @@ public class ScannerActivity extends Activity implements ZXingScannerView.Result
         SharedPreferences prefs = getApplicationContext().getSharedPreferences("ATTENDANCE_APP_PREFS", Context.MODE_PRIVATE);
         String studentId=prefs.getString("S_ID","0");
         DatabaseReference mDatabase;
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("courses").child(courseId).child("Section").child(section).child(date).child(studentId);
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("records").child(courseId).child(section).child(date).child(studentId);
         mDatabase.setValue(true);
 
         Toast.makeText(getApplicationContext(),rawResult.getText(),Toast.LENGTH_LONG).show();

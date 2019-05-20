@@ -12,11 +12,10 @@
         android:id="@+id/input_layout_courseid"
         android:layout_width="310dp"
         android:layout_height="70dp"
+        android:layout_marginTop="132dp"
         android:gravity="bottom"
-        android:layout_marginTop="35dp"
-        android:layout_marginBottom="44dp"
-        app:layout_constraintBottom_toTopOf="@+id/input_layout_coursename"
         app:layout_constraintEnd_toEndOf="@+id/input_layout_coursename"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/input_layout_coursename"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -40,52 +39,28 @@
     <android.support.design.widget.TextInputLayout
         android:id="@+id/input_layout_coursename"
         android:layout_width="310dp"
-        android:layout_height="70dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:gravity="bottom"
-        android:layout_marginBottom="42dp"
-        app:layout_constraintBottom_toTopOf="@+id/input_layout_coursesection"
-        app:layout_constraintEnd_toEndOf="@+id/input_layout_coursesection"
-        app:layout_constraintStart_toStartOf="@+id/input_layout_coursesection"
+        app:layout_constraintBottom_toTopOf="@+id/importBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/input_layout_courseid">
 
         <EditText
             android:id="@+id/CourseNameET"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:ems="10"
-            android:textColor="@android:color/background_light"
             android:background="@drawable/edittext2_rounded_bg"
-            android:paddingLeft="10dp"
+            android:ems="10"
             android:hint="@string/hint_coursename"
             android:inputType="textPersonName"
+            android:paddingLeft="10dp"
+            android:textColor="@android:color/background_light"
             android:textStyle="bold"
             tools:layout_editor_absoluteX="182dp" />
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/input_layout_coursesection"
-        android:layout_width="310dp"
-        android:layout_height="70dp"
-        android:gravity="bottom"
-        android:layout_marginStart="42dp"
-        android:layout_marginEnd="42dp"
-        android:layout_marginBottom="63dp"
-        app:layout_constraintBottom_toTopOf="@+id/importBtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/input_layout_coursename">
-
-        <EditText
-            android:id="@+id/CourseSectionET"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:ems="10"
-            android:textColor="@android:color/background_light"
-            android:background="@drawable/edittext2_rounded_bg"
-            android:paddingLeft="10dp"
-            android:hint="@string/hint_coursesection"
-            android:inputType="textPersonName"
-            android:textStyle="bold" />
     </android.support.design.widget.TextInputLayout>
 
     <Button
@@ -109,10 +84,10 @@
         android:id="@+id/importBtn"
         android:layout_width="141dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="184dp"
         android:background="@drawable/button_rounded_bg"
         android:text="import students"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/input_layout_coursesection" />
+        app:layout_constraintTop_toBottomOf="@+id/input_layout_courseid" />
 </android.support.constraint.ConstraintLayout>

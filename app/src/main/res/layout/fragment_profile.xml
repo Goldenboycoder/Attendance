@@ -16,7 +16,7 @@
         android:background="@drawable/editteext_rounded_bg"
         android:drawableLeft="@drawable/ic_action_profile"
         android:ems="10"
-        android:hint="Student ID"
+        android:hint="Student id"
         android:inputType="number"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/textView"

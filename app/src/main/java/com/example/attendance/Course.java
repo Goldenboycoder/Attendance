@@ -1,53 +1,31 @@
 package com.example.attendance;
 
-import java.util.ArrayList;
-
 public class Course {
-    private String id;
-    private String name;
-    private String section;
-    private ArrayList<Student> students;
+    private String ID;
+    private String Name;
 
     public Course() {
     }
 
-    public Course(String id, String name, String section, ArrayList<Student> students) {
-        this.id = id;
-        this.name = name;
-        this.section = section;
-        this.students = students;
+    public Course(String id, String name) {
+        this.ID = id;
+        this.Name = name;
 
     }
 
     public String getId() {
-        return id;
+        return ID;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.ID = id;
     }
 
     public String getName() {
-        return name;
+        return Name;
     }
 
     public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSection() {
-        return section;
-    }
-
-    public void setSection(String section) {
-        this.section = section;
-    }
-
-    public ArrayList<Student> getStudents() {
-        return students;
-    }
-
-    public void setStudents(ArrayList<Student> students) {
-        this.students = students;
+        this.Name = name;
     }
 }
