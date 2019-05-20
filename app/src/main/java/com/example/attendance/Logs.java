@@ -311,7 +311,7 @@ public class Logs extends Fragment {
     public void setAbsenses() {
         int count = 0;
         for(int i = 0; i < attended.size(); i++) {
-            if(attended.get(i)) {
+            if(!attended.get(i)) {
                 count ++;
             }
         }
