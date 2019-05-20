@@ -4,11 +4,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
@@ -28,11 +26,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
-import org.apache.poi.hpsf.Section;
+import org.apache.poi.hssf.OldExcelFormatException;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -40,10 +36,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.DataFormatter;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -263,7 +257,8 @@ public class CreateCourseFragment extends Fragment implements Serializable {
         try {
             Log.d("urid", "readExcelFile: " + uriData);
             // Creating Input Stream from uri
-            FileInputStream myInput = new FileInputStream(new File(getPath(uriData)));
+            //FileInputStream myInput = new FileInputStream(new File(getPath(uriData)));
+            InputStream myInput = getActivity().getContentResolver().openInputStream(uriData);
             // Create a POIFSFileSystem object
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
             // Create a workbook using the File System
@@ -274,6 +269,7 @@ public class CreateCourseFragment extends Fragment implements Serializable {
             Iterator rowIter = mySheet.rowIterator();
 
             //Empty attributes to use for student
+            students = new ArrayList<>();
             String name;
             String id;
             String image = "";
@@ -306,23 +302,13 @@ public class CreateCourseFragment extends Fragment implements Serializable {
                     students.add(student);
                 }
             }
-        } catch (Exception e) {
+        } catch (OldExcelFormatException e) {
+            Toast.makeText(getActivity(), "Old excel format detected (format 5.0/7.0 (BIFF5)). Please convert the excel file to BIFF8 from Excel versions 97/2000/XP/2003.", Toast.LENGTH_LONG).show();
+        } catch(Exception e) {
             Toast.makeText(getActivity(),"Please choose a .xls file",Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
         return;
-    }
-    //Convert content uri to a file path
-    private String getPath(Uri uri)
-    {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
-        if (cursor == null) return null;
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String s=cursor.getString(column_index);
-        cursor.close();
-        return s;
     }
     //Check storage permissions
     private  boolean isStoragePermissionGranted() {
