@@ -42,6 +42,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -263,9 +264,7 @@ public class CreateCourseFragment extends Fragment implements Serializable {
         try {
             Log.d("urid", "readExcelFile: " + uriData);
             // Creating Input Stream from uri
-            Toast.makeText(getActivity(),uriData.getPath(),Toast.LENGTH_LONG).show();
-            FileInputStream myInput = new FileInputStream(new File(uriData.getPath()));
-            Toast.makeText(getActivity(),uriData.getPath(),Toast.LENGTH_LONG).show();
+            InputStream myInput=getContext().getContentResolver().openInputStream(uriData);
             // Create a POIFSFileSystem object
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
             // Create a workbook using the File System
@@ -276,6 +275,7 @@ public class CreateCourseFragment extends Fragment implements Serializable {
             Iterator rowIter = mySheet.rowIterator();
 
             //Empty attributes to use for student
+            //students=new ArrayList<>();
             String name;
             String id;
             String image = "";
@@ -309,7 +309,7 @@ public class CreateCourseFragment extends Fragment implements Serializable {
                 }
             }
         } catch (Exception e) {
-            //Toast.makeText(getActivity(),"Please choose a .xls file",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),"Please choose a .xls file",Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
         return;
