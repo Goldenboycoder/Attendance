@@ -22,6 +22,9 @@ import java.util.ArrayList;
 
 
 public class CourseManagementFragment extends Fragment {
+    /*
+    * TODO reload this fragment when deleting a course
+    * */
     private DatabaseReference mDatabase;
     ArrayList<Course> courses = new ArrayList<>();
     RecyclerView recyclerView;
