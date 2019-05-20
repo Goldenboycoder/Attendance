@@ -324,6 +324,7 @@ public class CreateCourseFragment extends Fragment implements Serializable {
         cursor.moveToFirst();
         String s=cursor.getString(column_index);
         cursor.close();
+
         return s;
     }
     //Check storage permissions
