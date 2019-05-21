@@ -45,6 +45,10 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.MyViewHo
             });
         }
     }
+    /*
+    * TODO Bug the 2 list are changing when filtered we need to connect attended and students somehow so that when student att pos 3 becomes at pos 1 after filtering his attanded value which also is at pos 1 now need to go back to the old postion 3
+    *
+    * */
 
     public StudentAdapter(List<Student> studentList, List<Boolean> attended, String c, String s, String d, Logs ml) {
         viewBinderHelper.setOpenOnlyOne(true);
@@ -75,5 +79,14 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.MyViewHo
     @Override
     public int getItemCount() {
         return studentList.size();
+    }
+
+    public void filterList(List<Student> filteredList){
+        studentList=filteredList;
+        notifyDataSetChanged();
+    }
+    public void updateAttended(int position,boolean attended){
+        this.attended.set(position,attended);
+        notifyItemChanged(position);
     }
 }

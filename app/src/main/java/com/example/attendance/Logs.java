@@ -12,6 +12,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +21,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +64,10 @@ public class Logs extends Fragment {
     Button fetch;
 
     List<Student> students = new ArrayList<>();
+    List<Student> filteredStudents=new ArrayList<>();
     List<Boolean> attended = new ArrayList<>();
+    List<Boolean> filteredAttended = new ArrayList<>();
+    Boolean isFiltered=false;
     TextView absenses;
     RecyclerView recyclerView;
     StudentAdapter suAdapter;
@@ -72,6 +80,8 @@ public class Logs extends Fragment {
     CircleImageView popProfile;
     StorageReference storageRef;
     ProgressBar progressBar;
+    Switch Spresent;
+    EditText search;
 
 
     @Override
@@ -82,6 +92,7 @@ public class Logs extends Fragment {
         absenses = v.findViewById(R.id.absenses);
         spCourse=v.findViewById(R.id.spCourse);
         spSection=v.findViewById(R.id.spSection);
+        search=v.findViewById(R.id.edSearch);
         spDate=v.findViewById(R.id.spDate);
         fetch=v.findViewById(R.id.btnGet);
         recyclerView=v.findViewById(R.id.recycler_view);
@@ -159,14 +170,47 @@ public class Logs extends Fragment {
            }
 
            @Override
-           public void onLongClick(View view, int position) {
+           public void onLongClick(View view, final int position) {
                progressBar.setVisibility(View.VISIBLE);
-               student=students.get(position);
+               if(isFiltered){
+                   student=filteredStudents.get(position);
+               }
+               else{
+                    student=students.get(position);
+               }
+               Toast.makeText(getContext(),student.getId(),Toast.LENGTH_LONG).show();
                storageRef=FirebaseStorage.getInstance().getReferenceFromUrl("gs://attendanceapp-c1175.appspot.com/").child("students_pics").child(student.getId()+".jpg");
                LayoutInflater layoutInflater=(LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                final View customView=layoutInflater.inflate(R.layout.popup,null);
                closePop=customView.findViewById(R.id.btnClose);
                namePop=customView.findViewById(R.id.popName);
+               Spresent=customView.findViewById(R.id.swPresent);
+               mDatabase=FirebaseDatabase.getInstance().getReference().child("records").child(spCourse.getSelectedItem().toString()).child(spSection.getSelectedItem().toString()).child(spDate.getSelectedItem().toString()).child(student.getId());
+               mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                   @Override
+                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                       Spresent.setChecked((Boolean) dataSnapshot.getValue());
+
+                   }
+
+                   @Override
+                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                   }
+               });
+               Spresent.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                   @Override
+                   public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                       mDatabase.setValue(isChecked);
+                       if(isFiltered){
+
+                       }
+                       else{
+
+                       }
+                       suAdapter.updateAttended(position,isChecked);
+                   }
+               });
                idPop=customView.findViewById(R.id.popID);
                namePop.setText(student.getName());
                idPop.setText(student.getId());
@@ -179,7 +223,7 @@ public class Logs extends Fragment {
                        Matrix matrix=new Matrix();
                        matrix.postRotate(270);
                        popProfile.setImageBitmap(Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true));
-                       popupWindow=new PopupWindow(customView,500, 900);
+                       popupWindow=new PopupWindow(customView,500, 1100);
                        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER,0,0);
                        progressBar.setVisibility(View.INVISIBLE);
                    }
@@ -195,11 +239,47 @@ public class Logs extends Fragment {
                    @Override
                    public void onClick(View v) {
                        popupWindow.dismiss();
+                       suAdapter.notifyItemChanged(position);
                    }
                });
            }
        }));
+       search.addTextChangedListener(new TextWatcher() {
+           @Override
+           public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+           }
+
+           @Override
+           public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+           }
+
+           @Override
+           public void afterTextChanged(Editable s) {
+                filter(s.toString());
+           }
+       });
+
+
         return v;
+    }
+    private void filter(String text){
+        List<Student> filteredList=new ArrayList<>();
+        for(Student item: students){
+            if(item.getName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(item);
+            }
+        }
+
+        if(!filteredList.isEmpty()){
+            filteredStudents=filteredList;
+            isFiltered=true;
+            suAdapter.filterList(filteredList);
+        }
+        else
+            isFiltered=false;
+        suAdapter.notifyDataSetChanged();
     }
 
     private void loadCourses(final MyCourseCallback myCourseCallback){

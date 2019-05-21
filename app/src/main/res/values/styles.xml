@@ -12,5 +12,8 @@
     <style name="splashScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/screen_splash</item>
     </style>
+    <style name="SwitchCompatTheme">
+        <item name="android:colorControlActivated">@color/active</item>
+    </style>
 
 </resources>
