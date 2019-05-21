@@ -49,10 +49,11 @@ public class CreateCourseFragment extends Fragment implements Serializable {
     Uri uriData;
     ArrayList<Student> students = new ArrayList<>();
     ArrayList<Course> courses = new ArrayList<>();
-    private TextInputLayout inputLayoutCourseID,inputLayoutCourseName,inputLayoutCourseSection;
+    private TextInputLayout inputLayoutCourseID,inputLayoutCourseName;
     private static final int STORAGE_PERMISSION = 2;
     int totalsections;
     boolean exists = false;
+    Student val;
 
     public static CreateCourseFragment newInstance (ArrayList<Course> courses) {
         CreateCourseFragment nf = new CreateCourseFragment();
@@ -190,36 +191,26 @@ public class CreateCourseFragment extends Fragment implements Serializable {
             Toast.makeText(getActivity().getApplicationContext(), "Error Occurred", Toast.LENGTH_SHORT).show();
         }
     }
-/*
-* TODO weird shit if happening in addStudent with out a loop
-*
-*
-* */
+
     private void AddStudents(ArrayList<Student> students) {
         for(Student s : students) {
             try {
-                sDatabase = FirebaseDatabase.getInstance().getReference("students").child(s.getId());
-                DatabaseReference eDatabase = FirebaseDatabase.getInstance().getReference("students");
-                sDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                exists = false;
+                val = s;
+                sDatabase = FirebaseDatabase.getInstance().getReference("students");
+                sDatabase.orderByKey().equalTo(val.getId()).addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.exists()) {
-                            exists = true;
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()) {
+                            sDatabase.child(val.getId()).setValue(val);
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
                 });
-                if(exists) {
-                    Toast.makeText(getActivity().getApplicationContext(), "Students exist", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    eDatabase.child(s.getId()).setValue(s);
-                }
-            } catch (Exception e) {
+            }catch (Exception e) {
                 Toast.makeText(getActivity().getApplicationContext(), "Error Occurred", Toast.LENGTH_SHORT).show();
             }
         }
@@ -262,9 +253,6 @@ public class CreateCourseFragment extends Fragment implements Serializable {
         isStoragePermissionGranted();
         DataFormatter fmt = new DataFormatter();
         try {
-            Log.d("urid", "readExcelFile: " + uriData);
-            // Creating Input Stream from uri
-            //FileInputStream myInput = new FileInputStream(new File(getPath(uriData)));
             InputStream myInput = getActivity().getContentResolver().openInputStream(uriData);
             // Create a POIFSFileSystem object
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
