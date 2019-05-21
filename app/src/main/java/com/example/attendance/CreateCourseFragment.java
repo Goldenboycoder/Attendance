@@ -253,9 +253,6 @@ public class CreateCourseFragment extends Fragment implements Serializable {
         isStoragePermissionGranted();
         DataFormatter fmt = new DataFormatter();
         try {
-            Log.d("urid", "readExcelFile: " + uriData);
-            // Creating Input Stream from uri
-            //FileInputStream myInput = new FileInputStream(new File(getPath(uriData)));
             InputStream myInput = getActivity().getContentResolver().openInputStream(uriData);
             // Create a POIFSFileSystem object
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
