@@ -41,7 +41,9 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.MyViewHold
                     DatabaseReference sDatabase = FirebaseDatabase.getInstance().getReference().child("records").child(courses.get(getAdapterPosition()).getId());
                     mDatabase.removeValue();
                     sDatabase.removeValue();
+                    courses.remove(getAdapterPosition());
                     notifyDataSetChanged();
+                    notifyItemRemoved(getAdapterPosition());
                 }
             });
 
