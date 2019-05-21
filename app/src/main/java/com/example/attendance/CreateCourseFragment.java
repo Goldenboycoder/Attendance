@@ -190,7 +190,11 @@ public class CreateCourseFragment extends Fragment implements Serializable {
             Toast.makeText(getActivity().getApplicationContext(), "Error Occurred", Toast.LENGTH_SHORT).show();
         }
     }
-
+/*
+* TODO weird shit if happening in addStudent with out a loop
+*
+*
+* */
     private void AddStudents(ArrayList<Student> students) {
         for(Student s : students) {
             try {
@@ -209,7 +213,10 @@ public class CreateCourseFragment extends Fragment implements Serializable {
 
                     }
                 });
-                if(!exists) {
+                if(exists) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Students exist", Toast.LENGTH_SHORT).show();
+                }
+                else{
                     eDatabase.child(s.getId()).setValue(s);
                 }
             } catch (Exception e) {
