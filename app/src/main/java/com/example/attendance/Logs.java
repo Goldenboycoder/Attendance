@@ -179,7 +179,7 @@ public class Logs extends Fragment {
                        Matrix matrix=new Matrix();
                        matrix.postRotate(270);
                        popProfile.setImageBitmap(Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true));
-                       popupWindow=new PopupWindow(customView,500, 700);
+                       popupWindow=new PopupWindow(customView,500, 900);
                        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER,0,0);
                        progressBar.setVisibility(View.INVISIBLE);
                    }
@@ -311,7 +311,7 @@ public class Logs extends Fragment {
     public void setAbsenses() {
         int count = 0;
         for(int i = 0; i < attended.size(); i++) {
-            if(attended.get(i)) {
+            if(!attended.get(i)) {
                 count ++;
             }
         }
