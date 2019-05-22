@@ -13,7 +13,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,8 +51,6 @@ public class CreateCourseFragment extends Fragment implements Serializable {
     private TextInputLayout inputLayoutCourseID,inputLayoutCourseName;
     private static final int STORAGE_PERMISSION = 2;
     int totalsections;
-    boolean exists = false;
-    Student val;
 
     public static CreateCourseFragment newInstance (ArrayList<Course> courses) {
         CreateCourseFragment nf = new CreateCourseFragment();
@@ -192,28 +189,21 @@ public class CreateCourseFragment extends Fragment implements Serializable {
         }
     }
 
-    private void AddStudents(ArrayList<Student> students) {
-        for(Student s : students) {
-            try {
-                exists = false;
-                val = s;
-                sDatabase = FirebaseDatabase.getInstance().getReference("students");
-                sDatabase.orderByKey().equalTo(val.getId()).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (!dataSnapshot.exists()) {
-                            sDatabase.child(val.getId()).setValue(val);
-                        }
+    private void AddStudents(final ArrayList<Student> students) {
+        sDatabase = FirebaseDatabase.getInstance().getReference("students");
+        sDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(Student s : students) {
+                    if (!dataSnapshot.hasChild(s.getId())) {
+                        sDatabase.child(s.getId()).setValue(s);
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
-            }catch (Exception e) {
-                Toast.makeText(getActivity().getApplicationContext(), "Error Occurred", Toast.LENGTH_SHORT).show();
+                }
             }
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 
     public void getNbOfSections(final MySectionCallback2 mySectionCallback, String id){
