@@ -261,6 +261,7 @@ public class Logs extends Fragment {
            @Override
            public void afterTextChanged(Editable s) {
                 filter(s.toString());
+                suAdapter.notifyDataSetChanged();
            }
        });
 
@@ -279,16 +280,47 @@ public class Logs extends Fragment {
             }
         }
 
-        if(!filteredList.isEmpty()){
+        if(!text.equals("")){
             filteredStudents=filteredList;
             filteredAttended=filteredAttend;
             isFiltered=true;
-            filteredAdapter=new StudentAdapter(filteredStudents,filteredAttended,spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString(), Logs.this);
-            recyclerView.swapAdapter(filteredAdapter,false);
+            suAdapter.filterList(filteredStudents,filteredAttended);
+
+            //filteredAdapter=new StudentAdapter(filteredStudents,filteredAttended,spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString(), Logs.this);
+            //recyclerView.swapAdapter(filteredAdapter,true);
         }
-        else
+        else{
+            //recyclerView.swapAdapter(suAdapter,true);
+            for(int j=0;j<filteredList.size();j++){
+                for(int i=0;i<students.size();i++){
+                    if(students.get(i).getId().equals(filteredList.get(j).getId())){
+                        attended.set(i,filteredAttend.get(j));
+                    }
+                }
+            }
+            //suAdapter.filterList(students,attended);
+            //recyclerView.setAdapter(suAdapter);
             isFiltered=false;
-        //suAdapter.notifyDataSetChanged();
+            students=new ArrayList<>();
+            attended=new ArrayList<>();
+            loadStudents(new MyStudentsCallback() {
+
+                @Override
+                public void onCallback() {
+
+                    suAdapter=new StudentAdapter(students, attended,spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString(), Logs.this);
+                    RecyclerView.LayoutManager mLayoutManager=new LinearLayoutManager(getContext());
+                    recyclerView.setLayoutManager(mLayoutManager);
+                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+                    recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),LinearLayoutManager.VERTICAL));
+                    recyclerView.setAdapter(suAdapter);
+                    //set total absentees
+                    Toast.makeText(getContext(),attended.size()+"",Toast.LENGTH_LONG).show();
+                    setAbsenses();
+                }
+            },spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString());
+        }
+        suAdapter.notifyDataSetChanged();
     }
 
     private void loadCourses(final MyCourseCallback myCourseCallback){

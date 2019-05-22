@@ -81,8 +81,9 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.MyViewHo
         return studentList.size();
     }
 
-    public void filterList(List<Student> filteredList){
+    public void filterList(List<Student> filteredList,List<Boolean>filteredAttended){
         studentList=filteredList;
+        attended=filteredAttended;
         notifyDataSetChanged();
     }
     public void updateAttended(int position,boolean attended){
