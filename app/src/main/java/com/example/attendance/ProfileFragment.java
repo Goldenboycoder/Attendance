@@ -143,8 +143,6 @@ public class ProfileFragment extends Fragment {
                profilePic = view.findViewById(R.id.profile_pic);
                //Set the image
                profilePic.setImageURI(imageuri);
-               //profilePic.setImageBitmap(photo);
-               Toast.makeText(getActivity(),imageuri.toString(),Toast.LENGTH_SHORT).show();
                //store the image in firebase
                uploadPp();
 
@@ -162,7 +160,6 @@ public class ProfileFragment extends Fragment {
             StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
             StrictMode.setVmPolicy(builder.build());
             startActivityForResult(intent, 333);
-
     }
 
     public interface retrieveStudentIDsCallback {
