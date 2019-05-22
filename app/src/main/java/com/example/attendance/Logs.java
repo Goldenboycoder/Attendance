@@ -71,6 +71,7 @@ public class Logs extends Fragment {
     TextView absenses;
     RecyclerView recyclerView;
     StudentAdapter suAdapter;
+    StudentAdapter filteredAdapter;
     PopupWindow popupWindow;
     ConstraintLayout constraintLayout;
 
@@ -266,20 +267,26 @@ public class Logs extends Fragment {
     }
     private void filter(String text){
         List<Student> filteredList=new ArrayList<>();
-        for(Student item: students){
-            if(item.getName().toLowerCase().contains(text.toLowerCase())){
-                filteredList.add(item);
+        List<Boolean> filteredAttend = new ArrayList<>();
+
+        for(int i=0;i<students.size();i++){
+            if(students.get(i).getName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(students.get(i));
+                filteredAttend.add(attended.get(i));
+
             }
         }
 
         if(!filteredList.isEmpty()){
             filteredStudents=filteredList;
+            filteredAttended=filteredAttend;
             isFiltered=true;
-            suAdapter.filterList(filteredList);
+            filteredAdapter=new StudentAdapter(filteredStudents,filteredAttended,spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString(), Logs.this);
+            recyclerView.swapAdapter(filteredAdapter,false);
         }
         else
             isFiltered=false;
-        suAdapter.notifyDataSetChanged();
+        //suAdapter.notifyDataSetChanged();
     }
 
     private void loadCourses(final MyCourseCallback myCourseCallback){
