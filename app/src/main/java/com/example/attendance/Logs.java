@@ -147,6 +147,7 @@ public class Logs extends Fragment {
             @Override
             public void onClick(View v) {
                 students=new ArrayList<>();
+                attended=new ArrayList<>();
                 loadStudents(new MyStudentsCallback() {
                     @Override
                     public void onCallback() {
@@ -157,6 +158,7 @@ public class Logs extends Fragment {
                         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),LinearLayoutManager.VERTICAL));
                         recyclerView.setAdapter(suAdapter);
                         //set total absentees
+                        Toast.makeText(getContext(),attended.size()+"",Toast.LENGTH_LONG).show();
                         setAbsenses();
                     }
                 },spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString());
