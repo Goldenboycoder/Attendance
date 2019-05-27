@@ -98,6 +98,7 @@ public class Logs extends Fragment {
         fetch=v.findViewById(R.id.btnGet);
         recyclerView=v.findViewById(R.id.recycler_view);
         fetch.setEnabled(false);
+        search.setEnabled(false);
         loadCourses(new MyCourseCallback() {
             @Override
             public void onCallback() {
@@ -160,6 +161,7 @@ public class Logs extends Fragment {
                         //set total absentees
                         Toast.makeText(getContext(),attended.size()+"",Toast.LENGTH_LONG).show();
                         setAbsenses();
+                        search.setEnabled(true);
                     }
                 },spCourse.getSelectedItem().toString(),spSection.getSelectedItem().toString(),spDate.getSelectedItem().toString());
 
