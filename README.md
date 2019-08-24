@@ -1,6 +1,6 @@
 # Attendance
 
-Problem Statement 
+#Problem Statement 
 In a class room the instructor usually takes attendance each session.
 Taking attendance requires about 3 to 10 minutes depending on the size of the class room, not to mention the chaos that usually happens in the meantime.
 This is where Shusseki (Japanese for present) comes into play.
